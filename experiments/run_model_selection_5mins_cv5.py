@@ -1,6 +1,6 @@
 import os
 
-from experiments.experiments import ModelSelectionExperiment
+from experiments import ModelSelectionExperiment
 from nilmlab import exp_model_list
 from nilmlab.lab import TimeSeriesLength
 

@@ -8,7 +8,8 @@ import pywt
 from loguru import logger
 from pyts import approximation, transformation
 from sklearn.base import TransformerMixin
-from sklearn.externals import joblib
+# from sklearn.externals import joblib
+import joblib
 from tslearn import utils as tsutils
 from tslearn.piecewise import SymbolicAggregateApproximation, OneD_SymbolicAggregateApproximation
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance

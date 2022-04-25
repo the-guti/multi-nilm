@@ -1,6 +1,6 @@
 import os
 
-from experiments.experiments import ModelSelectionExperiment
+from experiments import ModelSelectionExperiment
 from nilmlab.lab import TimeSeriesLength
 
 dirname = os.path.dirname(__file__)

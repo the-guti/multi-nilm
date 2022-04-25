@@ -25,7 +25,7 @@ import os
 import traceback
 
 from datasources.datasource import DatasourceFactory
-from experiments.experiments import GenericExperiment
+from experiments import GenericExperiment
 from nilmlab import exp_model_list
 from nilmlab.factories import EnvironmentFactory
 from nilmlab.lab import TimeSeriesLength

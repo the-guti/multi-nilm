@@ -85,4 +85,4 @@ def run_experiments(experiment, appliances, window):
             debug(f"Failed for {k}")
             debug(f"{e}")
 
-run_experiments(env_ukdale_building_1, APPLIANCES_UK_DALE_BUILDING_1, TimeSeriesLength.WINDOW_1_HOUR)
+run_experiments(ukdale_building1_experiment, APPLIANCES_UK_DALE_BUILDING_1, TimeSeriesLength.WINDOW_1_HOUR)

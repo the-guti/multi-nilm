@@ -829,6 +829,7 @@ class Experiment(ABC):
         self.populate_test_parameters()
         debug(f"train building {self.train_building}")
         description = {
+            'date_time_experiment' : str(time.time()),
             'train_end_date'       : str(self.train_end_date),
             'train_start_date'     : str(self.train_start_date),
             'train_sample_period'  : str(self.train_sample_period),

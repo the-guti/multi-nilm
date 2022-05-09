@@ -1,5 +1,11 @@
+import dataclasses
+from doctest import debug_script
 import time
 from typing import Union, Iterable
+from unittest import skip
+
+from matplotlib import pyplot as plt
+from numpy import linalg, ndarray
 
 import numpy as np
 import pandas as pd
@@ -7,9 +13,12 @@ import psutil
 import pywt
 from loguru import logger
 from pyts import approximation, transformation
+from sklearn.mixture import GaussianMixture
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.base import TransformerMixin
 # from sklearn.externals import joblib
 import joblib
+from sklearn.neighbors import KNeighborsRegressor
 from tslearn import utils as tsutils
 from tslearn.piecewise import SymbolicAggregateApproximation, OneD_SymbolicAggregateApproximation
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance
@@ -18,10 +27,200 @@ from nilmlab.lab import TimeSeriesTransformer, TransformerType
 from utils import chaotic_toolkit
 from utils.logger import debug, timing, debug_mem, info
 
+SECONDS_PER_MINUTE = 60
+SECONDS_PER_HOUR = 60 * 60
 SECONDS_PER_DAY = 60 * 60 * 24
 
 CAPACITY15GB = 1024 * 1024 * 1024 * 15
 
+
+class MySignal2Vec(TimeSeriesTransformer):
+
+    def __init__(
+        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int = 15,
+        n_negative_samples: int = 2, epochs_emb: int = 10
+    ):
+
+        super().__init__()
+
+        self.window_size = window_size
+        self.window_step = window_step
+        self.num_of_representative_vectors = num_of_representative_vectors
+        self.min_n_components = min_n_components
+        self.max_n_components = max_n_components
+
+        # Initialize components
+
+        self.vocabulary = None
+        self.quant_clf = None
+
+    def transform(self, series: np.ndarray, sample_period: int = 6) -> np.ndarray:
+
+        # Transfort series to appriate dimmension
+
+        series = series.reshape(-1,1)
+
+        # Extract the vocabulary and data corpus
+
+        n_clusters, token_sequence = self.get_token_sequence(series=series, sample_period=sample_period)
+
+        self.vocabulary = np.array(range(n_clusters))
+
+        # Train kNN to quantize in the future
+
+        self.train_quantization_clf(n_neighbors=n_clusters, X=series, y=token_sequence)
+
+        # Build skip_gram data
+
+        self.build_skip_gram(token_sequence=token_sequence)
+
+        raise Exception('MySignal2Vec doesn\'t support transform yet.')
+
+    def approximate(self, data_in_batches: np.ndarray, window: int = 1, should_fit: bool = True) -> list:
+       
+        print(data_in_batches)
+       
+        raise Exception('MySignal2Vec doesn\'t support approximate yet.')
+
+    def reconstruct(self, series: np.ndarray) -> list:
+        raise Exception('MySignal2Vec doesn\'t support reconstruct yet.')
+
+    def get_type(self) -> TransformerType:
+        return self.type
+
+    def set_type(self, method_type: TransformerType):
+        if method_type == TransformerType.approximate:
+            raise Exception('MySignal2vec does not support only approximation. The series has to be transformed firstly')
+        self.type = method_type
+
+    def get_name(self):
+        raise Exception('MySignal2Vec doesn\'t support get_name yet.')
+
+    def build_skip_gram(self, token_sequence: ndarray):
+
+        debug(f'MySignal2Vec.build_skip_gram: Start building.')
+
+        start_time = time.time()
+        skip_gram = pd.DataFrame(columns=['input', 'output', 'target'])
+
+        for i in range(len(token_sequence) - self.window_size):
+
+            # Extract information of the segment
+
+            segment = token_sequence[i:i + self.window_size]
+            target_ix = int((self.window_size - 1) / 2)
+            target = segment[target_ix]
+            context = np.delete(segment, target_ix)
+            
+            # Add positive neighbor records to the skip_gram
+
+            for neighbor in np.unique(context):
+
+                skip_gram = pd.concat([skip_gram, pd.DataFrame([[target, neighbor, 1]], columns=['input', 'output', 'target'])])
+
+            # Add negative neighbor records to the skip_gram
+
+            neg_neighbors_set = np.concatenate((token_sequence[0:i], token_sequence[i + self.window_size:len(token_sequence)-1]))
+            negative_neighbors = np.random.choice(neg_neighbors_set, 2)
+
+            for neg_neighbor in negative_neighbors:
+
+                skip_gram = pd.concat([skip_gram, pd.DataFrame([[target, neg_neighbor, 0]], columns=['input', 'output', 'target'])])
+
+        skip_gram = skip_gram.drop_duplicates()
+
+        timing('MySignal2Vec.build_skip_gram: Finished building : {}'.format(round(time.time() - start_time, 2)))
+
+        return skip_gram
+
+    def one_hot_encoder(self, word: int):
+
+        one_hot = np.zeros(self.vocabulary)
+        one_hot[word] = 1
+
+        return one_hot
+
+    def train_quantization_clf(self, n_neighbors: int, X: ndarray, y: ndarray):
+
+        debug(f'MySignal2Vec.train_quantization_clf: Train.')
+
+        self.quant_clf = KNeighborsClassifier(n_neighbors=n_neighbors)
+        
+        start_time = time.time()
+        self.quant_clf.fit(X=X, y=y)
+        timing('MySignal2Vec.train_quantization_clf: Finished : {}'.format(round(time.time() - start_time, 2)))
+        
+
+    def get_token_sequence(self, series: ndarray, sample_period: int):
+
+        debug(f'MySignal2Vec.get_token_sequence: Transform to discrete space.')
+
+        data_chunks = self.split_in_chunks(series, sample_period)
+        debug_mem('Time series {} MB', series)
+        debug_mem('Data chunks {} MB', data_chunks)
+
+        start_time = time.time()
+        clustering_model = self.get_best_clustering_model(data_chunks=data_chunks)
+        timing('MySignal2Vec.get_token_sequence: Getting best GMM : {}'.format(round(time.time() - start_time, 2)))
+        
+        # Pass from the continuous series to a discrete series
+
+        sequence_of_tokens = clustering_model.predict(series)
+
+        return clustering_model.n_components, sequence_of_tokens
+
+    def get_best_clustering_model(self, data_chunks: ndarray) -> GaussianMixture:
+
+        lowest_bic = np.infty
+        bic = []
+        n_components_range = range(self.min_n_components, self.max_n_components)
+        cv_types = [ "spherical", "tied", "diag", "full" ]
+
+        for cv_type in cv_types:
+
+            for n_components in n_components_range:
+
+                gmm = GaussianMixture(
+                    n_components=n_components, covariance_type=cv_type, warm_start=True, reg_covar=1e-6
+                )
+
+                for chunk in data_chunks:
+
+                    # Fit a Gaussian mixture with EM
+                    gmm.fit(chunk)
+                    bic.append(gmm.bic(chunk))
+                    if bic[-1] < lowest_bic:
+                        lowest_bic = bic[-1]
+                        best_gmm = gmm 
+
+        bic = np.array(bic)
+
+        debug_script
+
+        return best_gmm
+
+    def map_into_vectors(self, sequence):
+        start_time = time.time()
+
+        # sequence_of_vectors = [self.embedding[str(i)] for i in sequence]
+        # timing('Appending vectors to list : {}'.format(round(time.time() - start_time, 2)))
+        # return sequence_of_vectors
+        raise Exception('MySignal2Vec doesn\'t support map_into_vectors yet.')
+
+    def split_in_chunks(self, sequence, sample_period: int = 6):
+        memory = psutil.virtual_memory()
+        debug('Memory: {}'.format(memory))
+        chunk_size = sample_period * SECONDS_PER_DAY
+        if memory.total >= CAPACITY15GB:
+            chunk_size = chunk_size * 2
+        seq = list()
+        split_n = max(int(len(sequence) / chunk_size), 1)
+        rem = len(sequence) % split_n
+        if rem != 0:
+            sequence = sequence[:-rem]
+
+        debug('Spliting data into {} parts for memory efficient clustering'.format(split_n))
+        return [chunk.reshape(-1,1) for chunk in np.split(sequence, split_n)]
 
 class Signal2Vec(TimeSeriesTransformer):
 
@@ -269,7 +468,7 @@ class TSLearnTransformerWrapper(TimeSeriesTransformer):
             if isinstance(self.transformer, SymbolicAggregateApproximation) or isinstance(self.transformer, OneD_SymbolicAggregateApproximation):
                 logger.info("Scaling the data so that they consist a normal distribution.")
                 scaler = TimeSeriesScalerMeanVariance(mu=0., std=1.)  # Rescale time series
-                segment = scaler.fit_transform(segment)
+                segment = scaler.fit_transform(segment.reshape(-1,1))
             ts_representation.append(self.transformer.fit_transform(segment))
         # debug('TSLearnApproximatorWrapper.approximate: ts_representation \n{}'.format(ts_representation))
         debug('TSLearnApproximatorWrapper.approximate: ts_representation shape {}'.format(np.shape(ts_representation)))

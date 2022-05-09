@@ -100,3 +100,5 @@ ENV/
 results/*
 !results/__init__.py
 
+*error*.err
+*output*.out

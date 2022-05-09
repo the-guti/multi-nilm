@@ -9,7 +9,8 @@ from datasources.datasource import DatasourceFactory, Datasource
 from nilmlab.lab import Environment
 from nilmlab.lab import TransformerType
 from nilmlab.tstransformers import TSLearnTransformerWrapper, PytsTransformerWrapper, Signal2Vec, WaveletAdapter, \
-    TimeDelayEmbeddingAdapter
+    TimeDelayEmbeddingAdapter, MySignal2Vec
+# from src.transformers.my_signal2vec import MySignal2Vec
 
 SECONDS_PER_DAY = 60 * 60 * 24
 
@@ -200,3 +201,15 @@ class TransformerFactory:
                                                     sample_period=sample_period)
         wavelet_adapter.set_type(transformer_type)
         return wavelet_adapter
+
+    @staticmethod
+    def buil_my_signal2vec(
+        word_size: int = 4, n_bins: int = 4, window_size: int = 10, window_step: int = 1,
+        transformer_type: TransformerType = TransformerType.transform_and_approximate
+    ):
+
+        my_signal2vec = MySignal2Vec()
+        my_signal2vec.set_type(transformer_type)
+
+        return my_signal2vec
+

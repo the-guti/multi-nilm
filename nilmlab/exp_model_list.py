@@ -16,6 +16,7 @@ DFT = 'DFT'
 PAA = 'PAA'
 WEASEL = 'WEASEL'
 SIGNAL2VEC = 'SIGNAL2VEC'
+MYSIGNAL2VEC = 'MYSIGNAL2VEC'
 TRANSFORMER_MODELS = 'TRANSFORMER_MODELS'
 CLF_MODELS = 'CLF_MODELS'
 BOSS = 'BOSS'
@@ -800,5 +801,16 @@ state_of_the_art = {
             MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')],
         TRANSFORMER_MODELS: [TransformerFactory.build_pyts_boss(word_size=2, n_bins=4, window_size=10,
                                                                 norm_mean=False, norm_std=False)]
+    }
+}
+
+gmm_experiment = {
+    MYSIGNAL2VEC : {
+        CLF_MODELS : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.buil_my_signal2vec()
+        ]
     }
 }

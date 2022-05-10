@@ -13,12 +13,17 @@ dirname = os.path.dirname(__file__)
 dirname = os.path.join(dirname, "../results")
 if not os.path.exists(dirname):
     os.mkdir(dirname)
-same_datasource_exp_checkpoint = os.path.join(dirname, 'results_from_my_exp.csv')
+same_datasource_exp_checkpoint = os.path.join(dirname, 'results_from_my_1_hour.csv')
 
 appliances = [
     'unknown', 'electric oven','sockets', 'electric space heater', 'microwave', 
     'washer dryer', 'light', 'electric stove', 'dish washer', 'fridge'
- ]
+]
+
+# appliances = [
+#     'microwave', 'dish washer', 'fridge', 'kettle', 'washer dryer',
+#     'toaster', 'television', 'hair dryer', 'vacuum cleaner'
+# ]
 
 # Configure environment parameters
 
@@ -28,17 +33,47 @@ env = EnvironmentFactory.create_env_single_building(
     sample_period=6,
     train_year="2011-2011",
     train_start_date="4-19-2011",
-    train_end_date="4-29-2011",
+    train_end_date="4-30-2011",
     test_year="2011",
-    test_start_date="5-19-2011",
-    test_end_date="5-20-2011",
+    test_start_date="5-1-2011",
+    test_end_date="5-2-2011",
     appliances=appliances
 )
 
+# env = EnvironmentFactory.create_env_single_building(
+#     datasource=DatasourceFactory.create_uk_dale_datasource(),
+#     building=1,
+#     sample_period=6,
+#     train_year="2013-2013",
+#     train_start_date="3-1-2013",
+#     train_end_date="5-30-2013",
+#     test_year="2014",
+#     test_start_date="3-1-2014",
+#     test_end_date="5-30-2014",
+#     appliances=appliances
+# )
+
 experiment = GenericExperiment(env)
 
-window = TimeSeriesLength.WINDOW_1_DAY
-models = exp_model_list.gmm_experiment
+window = TimeSeriesLength.WINDOW_1_HOUR
+# models = exp_model_list.my_boss
+# models = exp_model_list.my_experiment
+# models = exp_model_list.mysignal2vec_experiment
+# models = exp_model_list.gmm_experiment
+
+models = {}
+if window == TimeSeriesLength.WINDOW_10_MINS:
+    models = exp_model_list.selected_models_10mins
+elif window == TimeSeriesLength.WINDOW_1_HOUR:
+    models = exp_model_list.selected_models_1h
+elif window == TimeSeriesLength.WINDOW_2_HOURS:
+    models = exp_model_list.selected_models_2h
+elif window == TimeSeriesLength.WINDOW_8_HOURS:
+    models = exp_model_list.selected_models_8h
+elif window == TimeSeriesLength.WINDOW_4_HOURS:
+    models = exp_model_list.selected_models_4h
+elif window == TimeSeriesLength.WINDOW_1_DAY:
+    models = exp_model_list.selected_models_24h
 
 for k in models.keys():
     

@@ -18,7 +18,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.base import TransformerMixin
 # from sklearn.externals import joblib
 import joblib
-from sklearn.neighbors import KNeighborsRegressor
 from tslearn import utils as tsutils
 from tslearn.piecewise import SymbolicAggregateApproximation, OneD_SymbolicAggregateApproximation
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance
@@ -26,6 +25,12 @@ from tslearn.preprocessing import TimeSeriesScalerMeanVariance
 from nilmlab.lab import TimeSeriesTransformer, TransformerType
 from utils import chaotic_toolkit
 from utils.logger import debug, timing, debug_mem, info
+
+from torch import Tensor
+from torch.nn import NLLLoss
+from torch.optim import Adam
+
+from src.models.skip_gram import SkipGram
 
 SECONDS_PER_MINUTE = 60
 SECONDS_PER_HOUR = 60 * 60
@@ -53,6 +58,7 @@ class MySignal2Vec(TimeSeriesTransformer):
 
         self.vocabulary = None
         self.quant_clf = None
+        self.skipgram_mlp = None
 
     def transform(self, series: np.ndarray, sample_period: int = 6) -> np.ndarray:
 
@@ -70,9 +76,9 @@ class MySignal2Vec(TimeSeriesTransformer):
 
         self.train_quantization_clf(n_neighbors=n_clusters, X=series, y=token_sequence)
 
-        # Build skip_gram data
+        # Train skip_gram data
 
-        self.build_skip_gram(token_sequence=token_sequence)
+        self.train_skipgram(token_sequence=token_sequence)
 
         raise Exception('MySignal2Vec doesn\'t support transform yet.')
 
@@ -96,49 +102,79 @@ class MySignal2Vec(TimeSeriesTransformer):
     def get_name(self):
         raise Exception('MySignal2Vec doesn\'t support get_name yet.')
 
-    def build_skip_gram(self, token_sequence: ndarray):
-
-        debug(f'MySignal2Vec.build_skip_gram: Start building.')
+    def train_skipgram(self, token_sequence, lr: float = 1e-3, epochs: int = 10) -> None:
 
         start_time = time.time()
-        skip_gram = pd.DataFrame(columns=['input', 'output', 'target'])
 
-        for i in range(len(token_sequence) - self.window_size):
+        debug(f'MySignal2Vec.train_skipgram: Start training.')
 
-            # Extract information of the segment
+        self.skipgram_mlp = SkipGram(n_vocabulary=len(self.vocabulary))
+        criterion = NLLLoss()
+        optimizer = Adam(self.skipgram_mlp.parameters(), lr=lr)
 
-            segment = token_sequence[i:i + self.window_size]
-            target_ix = int((self.window_size - 1) / 2)
-            target = segment[target_ix]
-            context = np.delete(segment, target_ix)
-            
-            # Add positive neighbor records to the skip_gram
+        loss_history = []
 
-            for neighbor in np.unique(context):
+        for e in range(epochs):
 
-                skip_gram = pd.concat([skip_gram, pd.DataFrame([[target, neighbor, 1]], columns=['input', 'output', 'target'])])
+            for i in range(len(token_sequence) - self.window_size):
 
-            # Add negative neighbor records to the skip_gram
+                batch_skip_gram = self.get_batch_skip_gram(token_sequence, i)
 
-            neg_neighbors_set = np.concatenate((token_sequence[0:i], token_sequence[i + self.window_size:len(token_sequence)-1]))
-            negative_neighbors = np.random.choice(neg_neighbors_set, 2)
+                input = batch_skip_gram['input'].tolist()
+                target =batch_skip_gram['target'].tolist()
 
-            for neg_neighbor in negative_neighbors:
+                encoded_input = self.one_hot_encoder(words=input)
+                encoded_target = self.one_hot_encoder(words=input)
 
-                skip_gram = pd.concat([skip_gram, pd.DataFrame([[target, neg_neighbor, 0]], columns=['input', 'output', 'target'])])
+                # Use SkipGram nn
 
-        skip_gram = skip_gram.drop_duplicates()
+                log_ps = self.skipgram_mlp(Tensor(encoded_input).long())
+                loss = criterion(log_ps, Tensor(encoded_target).long())
+                
+                loss_history.append(loss)
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
         timing('MySignal2Vec.build_skip_gram: Finished building : {}'.format(round(time.time() - start_time, 2)))
 
+        print('Test')
+
+
+    def get_batch_skip_gram(self, token_sequence: ndarray, index: int) -> ndarray:
+
+        skip_gram = pd.DataFrame(columns=['input', 'target'])
+
+        # Extract information of the segment
+
+        segment = token_sequence[index:index + self.window_size]
+        target_ix = int((self.window_size - 1) / 2)
+        target = segment[target_ix]
+        context = np.delete(segment, target_ix)
+        
+        # Add positive neighbor records to the skip_gram
+
+        for neighbor in context:
+
+            skip_gram = pd.concat([skip_gram, pd.DataFrame([[target, neighbor]], columns=['input', 'target'])])
+
+        # Add negative neighbor records to the skip_gram
+
+        # neg_neighbors_set = np.concatenate((token_sequence[0:index], token_sequence[index + self.window_size:len(token_sequence)-1]))
+        # negative_neighbors = np.random.choice(neg_neighbors_set, 2)
+
+        # for neg_neighbor in negative_neighbors:
+
+        #     skip_gram = pd.concat([skip_gram, pd.DataFrame([[target, neg_neighbor]], columns=['input', 'output', 'target'])])
+
+        # timing('MySignal2Vec.build_skip_gram: Finished building : {}'.format(round(time.time() - start_time, 2)))
+
         return skip_gram
 
-    def one_hot_encoder(self, word: int):
+    def one_hot_encoder(self, words: ndarray) -> ndarray:
 
-        one_hot = np.zeros(self.vocabulary)
-        one_hot[word] = 1
-
-        return one_hot
+        return np.eye(len(self.vocabulary))[words]
 
     def train_quantization_clf(self, n_neighbors: int, X: ndarray, y: ndarray):
 
@@ -221,6 +257,96 @@ class MySignal2Vec(TimeSeriesTransformer):
 
         debug('Spliting data into {} parts for memory efficient clustering'.format(split_n))
         return [chunk.reshape(-1,1) for chunk in np.split(sequence, split_n)]
+
+class MySignal2VecPre(TimeSeriesTransformer):
+
+    def __init__(self, classifier_path: str, embedding_path: str, num_of_representative_vectors: int = 1):
+        super().__init__()
+        self.clf = joblib.load(classifier_path)
+        embedding = pd.read_csv(embedding_path)
+        self.embedding = embedding.reset_index().to_dict('list')
+        self.type = TransformerType.transform_and_approximate
+        self.num_of_representative_vectors = num_of_representative_vectors
+
+    def __repr__(self):
+        return f"Signal2Vec num_of_representative_vectors: {self.num_of_representative_vectors}"
+
+    def transform(self, series: np.ndarray, sample_period: int = 6) -> np.ndarray:
+        discrete_series = self.discretize_in_chunks(series, sample_period)
+        debug_mem('Time series {} MB', series)
+        debug_mem('Discrete series {} MB', discrete_series)
+
+        vector_representation = self.map_into_vectors(discrete_series)
+        debug_mem('Sequence of vectors : {} MB', vector_representation)
+
+        return np.array(vector_representation)
+
+    def approximate(self, data_in_batches: np.ndarray, window: int = 1, should_fit: bool = True) -> list:
+        # TODO: Window is used only by signal2vec, move it to constructor or extract it as len(segment).
+        if self.num_of_representative_vectors > 1:
+            window = int(window / self.num_of_representative_vectors)
+            data_in_batches = np.reshape(data_in_batches,
+                                         (len(data_in_batches), window, 300 * self.num_of_representative_vectors))
+
+        squeezed_seq = np.sum(data_in_batches, axis=1)
+        vf = np.vectorize(lambda x: x / window)
+        squeezed_seq = vf(squeezed_seq)
+        return squeezed_seq
+
+    def reconstruct(self, series: np.ndarray) -> list:
+        raise Exception('Signal2Vec doesn\'t support reconstruct yet.')
+
+    def get_name(self):
+        return type(self).__name__
+
+    def get_type(self):
+        return self.type
+
+    def set_type(self, method_type: TransformerType):
+        if method_type == TransformerType.approximate:
+            raise Exception('Signal2vec does not support only approximation. The series has to be transformed firstly')
+        self.type = method_type
+
+    def discretize(self, data):
+        debug('Length of data {}'.format(len(data)))
+        start_time = time.time()
+
+        pred = self.clf.predict(data.reshape(-1, 1))
+
+        timing('clf.predict: {}'.format(round(time.time() - start_time, 2)))
+        debug('Length of predicted sequence {}'.format(len(pred)))
+        debug('Type of discrete sequence {}'.format(type(pred)))
+
+        return pred
+
+    def map_into_vectors(self, sequence):
+        start_time = time.time()
+        sequence_of_vectors = [self.embedding[str(i)] for i in sequence]
+        timing('Appending vectors to list : {}'.format(round(time.time() - start_time, 2)))
+        return sequence_of_vectors
+
+    def discretize_in_chunks(self, sequence, sample_period: int = 6):
+        memory = psutil.virtual_memory()
+        debug('Memory: {}'.format(memory))
+        chunk_size = sample_period * SECONDS_PER_DAY
+        if memory.total >= CAPACITY15GB:
+            chunk_size = chunk_size * 2
+        seq = list()
+        split_n = max(int(len(sequence) / chunk_size), 1)
+        rem = len(sequence) % split_n
+        if rem != 0:
+            sequence = sequence[:-rem]
+
+        debug('Spliting data into {} parts for memory efficient classification'.format(split_n))
+        for d in np.split(sequence, split_n):
+            debug('Discretising time series...')
+            s = self.discretize(d)
+            seq.append(s)
+
+        return np.concatenate(seq)
+
+    def get_name(self):
+        pass
 
 class Signal2Vec(TimeSeriesTransformer):
 

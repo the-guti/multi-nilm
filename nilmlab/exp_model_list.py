@@ -5,7 +5,7 @@ from sklearn.tree import ExtraTreeClassifier
 from skmultilearn.adapt import MLkNN
 from skmultilearn.ensemble import RakelD
 
-from datasources.paths_manager import SAVED_MODEL, PATH_SIGNAL2VEC
+from datasources.paths_manager import SAVED_MODEL, MY_SAVED_MODEL, PATH_SIGNAL2VEC, MY_PATH_SIGNAL2VEC
 from nilmlab.factories import TransformerFactory
 from nilmlab.lab import TransformerType
 
@@ -39,6 +39,14 @@ selected_models_10mins = {
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
+        ]
+    },
+    MYSIGNAL2VEC: {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
         ]
     },
     PAA       : {
@@ -119,6 +127,21 @@ selected_models_4h = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=10),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=10),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=10)
+        ]
+    },
+    MYSIGNAL2VEC: {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam'),
+            MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam'),
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=5),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=10),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=10),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=10)
         ]
     },
     WEASEL    : {
@@ -245,6 +268,20 @@ selected_models_8h = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=5)
+        ]
+    },
+    MYSIGNAL2VEC: {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam'),
+            MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam'),
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam'),
+            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=50),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=5)
         ]
     },
     WEASEL    : {
@@ -378,6 +415,24 @@ selected_models_1h = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
         ]
     },
+    MYSIGNAL2VEC: {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=2),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
+        ]
+    },
     WEASEL    : {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic'),
@@ -507,6 +562,23 @@ selected_models_2h = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=5)
         ]
     },
+     MYSIGNAL2VEC: {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(2000), learning_rate='adaptive', solver='adam', activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=5)
+        ]
+    },
     WEASEL    : {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(2000), learning_rate='adaptive', solver='adam', activation='logistic'),
@@ -623,6 +695,20 @@ selected_models_24h = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=5),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=2)
+        ]
+    },
+    MYSIGNAL2VEC: {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam'),
+            MLPClassifier(hidden_layer_sizes=(2000), learning_rate='adaptive', solver='adam'),
+            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam'),
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=5),
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=2)
         ]
     },
     WEASEL    : {
@@ -804,13 +890,44 @@ state_of_the_art = {
     }
 }
 
+my_boss = {
+    BOSS                : {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')],
+        TRANSFORMER_MODELS: [TransformerFactory.build_pyts_boss(word_size=2, n_bins=4, window_size=10,
+                                                                norm_mean=False, norm_std=False)]
+    }
+}
+
+my_experiment = {
+    MYSIGNAL2VEC : {
+        CLF_MODELS : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
+        ]
+    }
+}
+
 gmm_experiment = {
     MYSIGNAL2VEC : {
         CLF_MODELS : [
             MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
         ],
         TRANSFORMER_MODELS: [
-            TransformerFactory.buil_my_signal2vec()
+            TransformerFactory.buil_mysignal2vec()
+        ]
+    }
+}
+
+mysignal2vec_experiment = {
+    MYSIGNAL2VEC : {
+        CLF_MODELS : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
         ]
     }
 }

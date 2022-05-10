@@ -905,7 +905,7 @@ my_experiment = {
             MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
         ],
         TRANSFORMER_MODELS: [
-            TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
+            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
         ]
     }
 }
@@ -923,11 +923,25 @@ gmm_experiment = {
 
 mysignal2vec_experiment = {
     MYSIGNAL2VEC : {
-        CLF_MODELS : [
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(1000, 100, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(1000, 100, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic'),
+            MLPClassifier(hidden_layer_sizes=(1000, 100, 100), learning_rate='adaptive', solver='adam',
+                          activation='logistic')
         ],
         TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
+            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=2),
+            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
+            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
+            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=2),
+            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
+            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
+            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
         ]
     }
 }

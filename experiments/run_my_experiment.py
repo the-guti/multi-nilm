@@ -6,56 +6,62 @@ from experiments import GenericExperiment
 from nilmlab import exp_model_list
 from nilmlab.factories import EnvironmentFactory
 from nilmlab.lab import TimeSeriesLength
-from nilmlab.exp_model_list import CLF_MODELS, TRANSFORMER_MODELS, SAX
+from nilmlab.exp_model_list import CLF_MODELS, TRANSFORMER_MODELS
 from utils.logger import debug
 
 dirname = os.path.dirname(__file__)
 dirname = os.path.join(dirname, "../results")
 if not os.path.exists(dirname):
     os.mkdir(dirname)
-same_datasource_exp_checkpoint = os.path.join(dirname, 'results_from_my_1_hour.csv')
 
-appliances = [
-    'unknown', 'electric oven','sockets', 'electric space heater', 'microwave', 
-    'washer dryer', 'light', 'electric stove', 'dish washer', 'fridge'
-]
+window = TimeSeriesLength.WINDOW_1_HOUR
+datasource_ix = 0
 
-# appliances = [
-#     'microwave', 'dish washer', 'fridge', 'kettle', 'washer dryer',
-#     'toaster', 'television', 'hair dryer', 'vacuum cleaner'
-# ]
+if datasource_ix:
+    datasource_name = 'redd'
+    datasource = DatasourceFactory.create_redd_datasource()
+    appliances = [
+        'unknown', 'electric oven','sockets', 'electric space heater', 'microwave', 
+        'washer dryer', 'light', 'electric stove', 'dish washer', 'fridge'
+    ]
+    env = EnvironmentFactory.create_env_single_building(
+        datasource=datasource,
+        building=1,
+        sample_period=6,
+        train_year="2011-2011",
+        train_start_date="4-19-2011",
+        train_end_date="4-30-2011",
+        test_year="2011",
+        test_start_date="5-1-2011",
+        test_end_date="5-2-2011",
+        appliances=appliances
+    )
+else:
+    datasource_name = 'uk_dale'
+    datasource = DatasourceFactory.create_uk_dale_datasource()
+    appliances = [
+        'microwave', 'dish washer', 'fridge', 'kettle', 'washer dryer',
+        'toaster', 'television', 'hair dryer', 'vacuum cleaner'
+    ]
+    env = EnvironmentFactory.create_env_single_building(
+        datasource=DatasourceFactory.create_uk_dale_datasource(),
+        building=1,
+        sample_period=6,
+        train_year="2013-2013",
+        train_start_date="3-1-2013",
+        train_end_date="5-30-2013",
+        test_year="2014",
+        test_start_date="3-1-2014",
+        test_end_date="5-30-2014",
+        appliances=appliances
+    )
+
+same_datasource_exp_checkpoint = os.path.join(dirname, f'results_from_my_{window}_{datasource_name}.csv')
 
 # Configure environment parameters
 
-env = EnvironmentFactory.create_env_single_building(
-    datasource=DatasourceFactory.create_redd_datasource(),
-    building=1,
-    sample_period=6,
-    train_year="2011-2011",
-    train_start_date="4-19-2011",
-    train_end_date="4-30-2011",
-    test_year="2011",
-    test_start_date="5-1-2011",
-    test_end_date="5-2-2011",
-    appliances=appliances
-)
-
-# env = EnvironmentFactory.create_env_single_building(
-#     datasource=DatasourceFactory.create_uk_dale_datasource(),
-#     building=1,
-#     sample_period=6,
-#     train_year="2013-2013",
-#     train_start_date="3-1-2013",
-#     train_end_date="5-30-2013",
-#     test_year="2014",
-#     test_start_date="3-1-2014",
-#     test_end_date="5-30-2014",
-#     appliances=appliances
-# )
-
 experiment = GenericExperiment(env)
 
-window = TimeSeriesLength.WINDOW_1_HOUR
 # models = exp_model_list.my_boss
 # models = exp_model_list.my_experiment
 # models = exp_model_list.mysignal2vec_experiment

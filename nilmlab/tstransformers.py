@@ -26,11 +26,18 @@ from nilmlab.lab import TimeSeriesTransformer, TransformerType
 from utils import chaotic_toolkit
 from utils.logger import debug, timing, debug_mem, info
 
+import torch
 from torch import Tensor
 from torch.nn import NLLLoss
 from torch.optim import Adam
 
 from src.models.skip_gram import SkipGram
+
+from datetime import datetime
+
+torch.set_default_dtype(torch.float64)
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 SECONDS_PER_MINUTE = 60
 SECONDS_PER_HOUR = 60 * 60
@@ -38,12 +45,13 @@ SECONDS_PER_DAY = 60 * 60 * 24
 
 CAPACITY15GB = 1024 * 1024 * 1024 * 15
 
+exp_name = "max50comp_" + " ukdale_1day_" 
 
+# Train
 class MySignal2Vec(TimeSeriesTransformer):
 
     def __init__(
-        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int = 15,
-        n_negative_samples: int = 2, epochs_emb: int = 10
+        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int =50
     ):
 
         super().__init__()
@@ -102,13 +110,13 @@ class MySignal2Vec(TimeSeriesTransformer):
     def get_name(self):
         raise Exception('MySignal2Vec doesn\'t support get_name yet.')
 
-    def train_skipgram(self, token_sequence, lr: float = 1e-3, epochs: int = 10) -> None:
+    def train_skipgram(self, token_sequence, lr: float = 1e-3, epochs: int = 3) -> None:
 
         start_time = time.time()
 
         debug(f'MySignal2Vec.train_skipgram: Start training.')
 
-        self.skipgram_mlp = SkipGram(n_vocabulary=len(self.vocabulary))
+        self.skipgram_mlp = SkipGram(n_vocabulary=len(self.vocabulary)).to(device)
         criterion = NLLLoss()
         optimizer = Adam(self.skipgram_mlp.parameters(), lr=lr)
 
@@ -120,26 +128,35 @@ class MySignal2Vec(TimeSeriesTransformer):
 
                 batch_skip_gram = self.get_batch_skip_gram(token_sequence, i)
 
-                input = batch_skip_gram['input'].tolist()
-                target =batch_skip_gram['target'].tolist()
+                input  = batch_skip_gram['input'].tolist()
+                target = batch_skip_gram['target'].tolist()
 
-                encoded_input = self.one_hot_encoder(words=input)
-                encoded_target = self.one_hot_encoder(words=input)
+                encoded_input = Tensor(self.one_hot_encoder(words=input)).long().to(device)
+                encoded_target = Tensor(self.one_hot_encoder(words=target)).long().to(device)
 
                 # Use SkipGram nn
 
-                log_ps = self.skipgram_mlp(Tensor(encoded_input).long())
-                loss = criterion(log_ps, Tensor(encoded_target).long())
-                
-                loss_history.append(loss)
+                log_ps = self.skipgram_mlp(encoded_input)
+                loss = criterion(log_ps, encoded_target)
+                if i % 10000 == 0:
+                    loss_history.append(loss)
 
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+            # Checkpoint save skipgram dict
+            debug(f'MySignal2Vec.train_skipgram: Checkpoint saving.')
+            emb = self.skipgram_mlp.state_dict()['model.0.weight']
+            emb_np = [em.detach().numpy() for em in emb.T]
+            df = pd.DataFrame(emb_np)
+            # Prepare name of file
+            dt_string = datetime.now().strftime("%H_%M_%S-%d_%m_%Y")
+
+            file_name = "emb_" + exp_name + str(e) + "ep_"+dt_string +".csv"
+            # Save CSV
+            df.to_csv(file_name, index=False)
 
         timing('MySignal2Vec.build_skip_gram: Finished building : {}'.format(round(time.time() - start_time, 2)))
-
-        print('Test')
 
 
     def get_batch_skip_gram(self, token_sequence: ndarray, index: int) -> ndarray:
@@ -182,8 +199,18 @@ class MySignal2Vec(TimeSeriesTransformer):
 
         self.quant_clf = KNeighborsClassifier(n_neighbors=n_neighbors)
         
+        debug(f'================D-333 N tokens {n_neighbors}')
+
         start_time = time.time()
         self.quant_clf.fit(X=X, y=y)
+        # Save file
+        debug(f'MySignal2Vec.train_quantization_clf: saving checkpoint.')
+        dt_string = datetime.now().strftime("%H_%M_%S-%d_%m_%Y")
+        file_name = "KNNweights_" + exp_name +dt_string +".pkl"
+
+        joblib.dump(self.quant_clf,file_name)
+        
+
         timing('MySignal2Vec.train_quantization_clf: Finished : {}'.format(round(time.time() - start_time, 2)))
         
 
@@ -229,6 +256,7 @@ class MySignal2Vec(TimeSeriesTransformer):
                         lowest_bic = bic[-1]
                         best_gmm = gmm 
 
+
         bic = np.array(bic)
 
         debug_script
@@ -258,6 +286,7 @@ class MySignal2Vec(TimeSeriesTransformer):
         debug('Spliting data into {} parts for memory efficient clustering'.format(split_n))
         return [chunk.reshape(-1,1) for chunk in np.split(sequence, split_n)]
 
+# Infer
 class MySignal2VecPre(TimeSeriesTransformer):
 
     def __init__(self, classifier_path: str, embedding_path: str, num_of_representative_vectors: int = 1):

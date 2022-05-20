@@ -62,24 +62,23 @@ same_datasource_exp_checkpoint = os.path.join(dirname, f'results_from_my_{window
 
 experiment = GenericExperiment(env)
 
-# models = exp_model_list.my_boss
 # models = exp_model_list.my_experiment
 # models = exp_model_list.mysignal2vec_experiment
-models = exp_model_list.gmm_experiment
+# models = exp_model_list.gmm_experiment
 
-# models = {}
-# if window == TimeSeriesLength.WINDOW_10_MINS:
-#     models = exp_model_list.selected_models_10mins
-# elif window == TimeSeriesLength.WINDOW_1_HOUR:
-#     models = exp_model_list.selected_models_1h
-# elif window == TimeSeriesLength.WINDOW_2_HOURS:
-#     models = exp_model_list.selected_models_2h
-# elif window == TimeSeriesLength.WINDOW_8_HOURS:
-#     models = exp_model_list.selected_models_8h
-# elif window == TimeSeriesLength.WINDOW_4_HOURS:
-#     models = exp_model_list.selected_models_4h
-# elif window == TimeSeriesLength.WINDOW_1_DAY:
-#     models = exp_model_list.selected_models_24h
+models = {}
+if window == TimeSeriesLength.WINDOW_10_MINS:
+    models = exp_model_list.selected_models_10mins
+elif window == TimeSeriesLength.WINDOW_1_HOUR:
+    models = exp_model_list.selected_models_1h
+elif window == TimeSeriesLength.WINDOW_2_HOURS:
+    models = exp_model_list.selected_models_2h
+elif window == TimeSeriesLength.WINDOW_8_HOURS:
+    models = exp_model_list.selected_models_8h
+elif window == TimeSeriesLength.WINDOW_4_HOURS:
+    models = exp_model_list.selected_models_4h
+elif window == TimeSeriesLength.WINDOW_1_DAY:
+    models = exp_model_list.selected_models_24h
 
 for k in models.keys():
     

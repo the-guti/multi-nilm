@@ -45,13 +45,15 @@ SECONDS_PER_DAY = 60 * 60 * 24
 
 CAPACITY15GB = 1024 * 1024 * 1024 * 15
 
-exp_name = "max50comp_" + " ukdale_1day_" 
+#exp_name = "max15comp_" + " ukdale_1day_" 
+exp_name = "xtraInf" + " ukdale_1day_" 
+
 
 # Train
 class MySignal2Vec(TimeSeriesTransformer):
 
     def __init__(
-        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int =50
+        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int = 75
     ):
 
         super().__init__()
@@ -147,7 +149,7 @@ class MySignal2Vec(TimeSeriesTransformer):
             # Checkpoint save skipgram dict
             debug(f'MySignal2Vec.train_skipgram: Checkpoint saving.')
             emb = self.skipgram_mlp.state_dict()['model.0.weight']
-            emb_np = [em.detach().numpy() for em in emb.T]
+            emb_np = [em.detach().cpu().numpy() for em in emb.T]
             df = pd.DataFrame(emb_np)
             # Prepare name of file
             dt_string = datetime.now().strftime("%H_%M_%S-%d_%m_%Y")

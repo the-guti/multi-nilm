@@ -760,9 +760,9 @@ selected_models_24h = {
     #     ],
     #     TRANSFORMER_MODELS: [
     #         TransformerFactory.build_pyts_sfa(n_coefs=10, n_bins=5, norm_mean=False, norm_std=False),
-    #         TransformerFactory.build_pyts_sfa(n_coefs=10, n_bins=5, norm_mean=False, norm_std=False),
-    #         TransformerFactory.build_pyts_sfa(n_coefs=10, n_bins=5, norm_mean=False, norm_std=False),
-    #         TransformerFactory.build_pyts_sfa(n_coefs=10, n_bins=5, norm_mean=False, norm_std=False)
+    #         TransformerFactory.build_pyts_sfa(n_coefs=10, n_bins=4, norm_mean=False, norm_std=False),
+    #         TransformerFactory.build_pyts_sfa(n_coefs=10, n_bins=3, norm_mean=False, norm_std=False),
+    #         TransformerFactory.build_pyts_sfa(n_coefs=10, n_bins=2, norm_mean=False, norm_std=False)
     #     ]
     # },
     # SAX1D     : {
@@ -797,10 +797,15 @@ selected_models_24h = {
     #     CLF_MODELS        : [
     #         MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
     #         RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
+    #                              solver='adam'), labelset_size=5),
+    #         MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
+    #         RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
     #                              solver='adam'), labelset_size=5)
     #     ],
     #     TRANSFORMER_MODELS: [TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6),
-    #                          TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6)
+    #                          TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6),
+    #                          TransformerFactory.build_delay_embedding(delay_in_seconds=15, dimension=6),
+    #                          TransformerFactory.build_delay_embedding(delay_in_seconds=15, dimension=6),
     #                          ]
     # },
     # WEASEL    : {
@@ -808,13 +813,15 @@ selected_models_24h = {
     #         MLPClassifier(hidden_layer_sizes=(100,), learning_rate='adaptive', solver='adam'),
     #         MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic'),
     #         MLPClassifier(hidden_layer_sizes=(100,), learning_rate='adaptive', solver='adam', activation='logistic'),
+    #         MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam'),
     #         MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam')
     #     ],
     #     TRANSFORMER_MODELS: [
     #         TransformerFactory.build_pyts_weasel(word_size=2, n_bins=4, norm_mean=False, norm_std=False),
     #         TransformerFactory.build_pyts_weasel(word_size=2, n_bins=4, norm_mean=False, norm_std=False),
     #         TransformerFactory.build_pyts_weasel(word_size=4, n_bins=8, norm_mean=False, norm_std=False),
-    #         TransformerFactory.build_pyts_weasel(word_size=2, n_bins=4, norm_mean=False, norm_std=False)
+    #         TransformerFactory.build_pyts_weasel(word_size=2, n_bins=4, norm_mean=False, norm_std=False),
+    #         TransformerFactory.build_pyts_weasel(word_size=2, n_bins=2, norm_mean=False, norm_std=False)
     #     ]
     # },
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=15-ukdale		# Job name
+#SBATCH --job-name=85-test-ukdale		# Job name
 #SBATCH --output=cpu_output.%A_%a.out	# Standard output log
 #SBATCH --error=cpu_error.%A_%a.err         # Error log config
 #SBATCH --nodes=1                  	# Run all processes on a single node	

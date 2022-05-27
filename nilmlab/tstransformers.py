@@ -45,15 +45,14 @@ SECONDS_PER_DAY = 60 * 60 * 24
 
 CAPACITY15GB = 1024 * 1024 * 1024 * 15
 
-#exp_name = "max15comp_" + " ukdale_1day_" 
-exp_name = "xtraInf" + " ukdale_1day_" 
-
+exp_name = "max15comp" + " ukdale_1min_" 
+comps = 15
 
 # Train
 class MySignal2Vec(TimeSeriesTransformer):
 
     def __init__(
-        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int = 75
+        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int = comps
     ):
 
         super().__init__()

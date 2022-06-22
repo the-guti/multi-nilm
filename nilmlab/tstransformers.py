@@ -130,7 +130,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
 
         loss_history = []
 
-        for e in range(self.epochs):
+        for _ in range(self.epochs):
 
             for i in range(len(token_sequence) - self.window_size):
 
@@ -157,13 +157,11 @@ class MySignal2VecTrain(TimeSeriesTransformer):
             emb = self.skipgram_mlp.state_dict()['model.0.weight']
             emb_np = [em.detach().cpu().numpy() for em in emb.T]
             df = pd.DataFrame(emb_np)
-            # Prepare name of file
-            # dt_string = datetime.now().strftime("_%H_%M_%S-%d_%m_%Y")
+
+            # Prepare name of file and save
             dirname = os.path.join(os.path.abspath(''), "pretrained_models/")
-            file_name = dirname + self.exp_name + ".csv"
-            # TODO delete prev epoch file, save as binary 
-            # Save CSV
-            df.to_csv(file_name , index=False)
+            file_name = dirname + self.exp_name + "_emb.pkl"
+            joblib.dump(df,file_name)
 
         timing('MySignal2Vec.build_skip_gram: Finished building : {}'.format(round(time.time() - start_time, 2)))
 
@@ -216,7 +214,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
         debug(f'MySignal2Vec.train_quantization_clf: saving checkpoint.')
         dirname = os.path.join(os.path.abspath(''), "pretrained_models/")
 
-        file_name = dirname + self.exp_name + ".pkl"
+        file_name = dirname + self.exp_name + "_weight.pkl"
         joblib.dump(self.quant_clf,file_name)
         
 
@@ -309,16 +307,24 @@ class MySignal2VecInfer(TimeSeriesTransformer):
         self.num_of_representative_vectors = num_of_representative_vectors
         self.name = "mySignal2VecInfer"
 
+        # Init empty 
+        self.clf = None
+        self.embedding = None
+
     def __repr__(self):
         return f"Signal2Vec num_of_representative_vectors: {self.num_of_representative_vectors}"
 
     def load_weights(self):
         self.clf = joblib.load(self.classifier_path)
-        embedding = pd.read_csv(self.embedding_path)
-        self.embedding = embedding.reset_index().to_dict('list')
-        pass
+        self.embedding = joblib.load(self.embedding_path)
+        #TODO review
+        # embedding = pd.read_csv(self.embedding_path)
+        # self.embedding = embedding.reset_index().to_dict('list')
 
     def transform(self, series: np.ndarray, sample_period: int = 6) -> np.ndarray:
+        # TODO move function elsewhere Load weights
+        self.load_weights()
+
         discrete_series = self.discretize_in_chunks(series, sample_period)
         debug_mem('Time series {} MB', series)
         debug_mem('Discrete series {} MB', discrete_series)
@@ -368,7 +374,9 @@ class MySignal2VecInfer(TimeSeriesTransformer):
 
     def map_into_vectors(self, sequence):
         start_time = time.time()
-        sequence_of_vectors = [self.embedding[str(i)] for i in sequence]
+        sequence_of_vectors = [self.embedding[i] for i in sequence] #TODO ERROR, calculating sequence wrong?
+        # sequence_of_vectors = [self.embedding[str(i)] for i in sequence] #TODO ERROR, calculating sequence wrong?
+
         timing('Appending vectors to list : {}'.format(round(time.time() - start_time, 2)))
         return sequence_of_vectors
 

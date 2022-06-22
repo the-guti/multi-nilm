@@ -121,7 +121,7 @@ class GenericExperiment(Experiment):
             transformer_descr = str(transformer)
             clf = self.classifiers[model_index]
             clf_descr = str(clf)
-            for i in range(self.repeat):
+            for _ in range(self.repeat):
                 self.env.place_multilabel_classifier(clf)
                 self.env.place_ts_transformer(transformer)
                 start_time = time.time()

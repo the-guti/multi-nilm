@@ -81,24 +81,24 @@ max_n_components = 20
 epochs  = 2
 
 # File names 
-exp_name =  "/" + datasource_name + "/" + str(window)[24:] + "_" + str(max_n_components) # Remove timeseries from string
+exp_name = datasource_name + "/" + str(window)[24:] + "_" + str(max_n_components) # Remove timeseries from string
 
-mys2v_knn_weights = os.path.join(dirname_pre, f'{exp_name}.pkl')
-mys2v_embedding = os.path.join(dirname_pre, f'{exp_name}.csv')
+mys2v_knn_weights = os.path.join(dirname_pre, f'{exp_name}_weight.pkl')
+mys2v_embedding = os.path.join(dirname_pre, f'{exp_name}_emb.pkl')
 results_file_name = os.path.join(dirname_res, f'{exp_name}.csv')
 
 
 models =  infer_mysignal2vec_experiment = {
-    'MYSIGNAL2VEC_Build' : {
-        'CLF_MODELS' : [ 
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
-        ],
-        'TRANSFORMER_MODELS': [
-            TransformerFactory.build_mysignal2vec_train(num_of_representative_vectors, 
-                                                        window_size, window_step, min_n_components,
-                                                        max_n_components, epochs, exp_name),
-        ]
-    },
+    # 'MYSIGNAL2VEC_Build' : {
+    #     'CLF_MODELS' : [ 
+    #         MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
+    #     ],
+    #     'TRANSFORMER_MODELS': [
+    #         TransformerFactory.build_mysignal2vec_train(num_of_representative_vectors, 
+    #                                                     window_size, window_step, min_n_components,
+    #                                                     max_n_components, epochs, exp_name),
+    #     ]
+    # },
     'MYSIGNAL2VEC_Infer' : {
         'CLF_MODELS' : [ 
             MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),

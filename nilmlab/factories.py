@@ -214,10 +214,9 @@ class TransformerFactory:
         return mysignal2vec
 
     @staticmethod
-    def build_mysignal2vec_infer(classifier_path: str, embedding_path: str,
-                         transformer_type: TransformerType = TransformerType.transform_and_approximate,
-                         num_of_vectors: int = 1):
-        mysignal2vec_pre = MySignal2VecInfer(classifier_path, embedding_path, num_of_representative_vectors=num_of_vectors)
+    def build_mysignal2vec_infer(classifier_path: str, embedding_path: str,num_of_vectors: int = 1,
+                         transformer_type: TransformerType = TransformerType.transform_and_approximate):
+        mysignal2vec_pre = MySignal2VecInfer(classifier_path, embedding_path, num_of_vectors)
         mysignal2vec_pre.set_type(transformer_type)
         return mysignal2vec_pre
 

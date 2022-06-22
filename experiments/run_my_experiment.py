@@ -1,22 +1,31 @@
 import os
 import traceback
 
+from sklearn.neural_network import MLPClassifier
+from nilmlab.factories import TransformerFactory
+
 from datasources.datasource import DatasourceFactory
 from experiments import GenericExperiment
-from nilmlab import exp_model_list
 from nilmlab.factories import EnvironmentFactory
 from nilmlab.lab import TimeSeriesLength
-from nilmlab.exp_model_list import CLF_MODELS, TRANSFORMER_MODELS
 from utils.logger import debug
 
-dirname = os.path.dirname(__file__)
-dirname = os.path.join(dirname, "../results")
-if not os.path.exists(dirname):
-    os.mkdir(dirname)
+# Prepare Folders
+dirname = os.path.abspath('')
 
-weights = "1min_15_uk_"
-window = TimeSeriesLength.WINDOW_1_MIN  
-datasource_ix = 0 # 0,false,ukdale    / 1,true,redd
+    # Results folder
+dirname_res = os.path.join(dirname, "results/")
+if not os.path.exists(dirname_res):
+    os.mkdir(dirname_res)
+
+    # Pretrained KNN weights folder
+dirname_pre = os.path.join(dirname, "pretrained_models/")
+if not os.path.exists(dirname_pre):
+    os.mkdir(dirname_pre)
+
+#TODO add paths for both datasets in pretrained and resultsS
+
+datasource_ix = 1 # 0,false,ukdale    / 1,true,redd
 
 if datasource_ix:
     datasource_name = 'redd'
@@ -31,14 +40,14 @@ if datasource_ix:
         sample_period=6,
         train_year="2011-2011",
         train_start_date="4-19-2011",
-        train_end_date="4-30-2011",
+        train_end_date="4-20-2011",
         test_year="2011",
         test_start_date="5-1-2011",
         test_end_date="5-2-2011",
         appliances=appliances
     )
 else:
-    datasource_name = 'uk_dale'
+    datasource_name = 'ukdale' # Review name change
     datasource = DatasourceFactory.create_uk_dale_datasource()
     appliances = [
         'microwave', 'dish washer', 'fridge', 'kettle', 'washer dryer',
@@ -57,42 +66,62 @@ else:
         appliances=appliances
     )
 
-same_datasource_exp_checkpoint = os.path.join(dirname, f'results_{weights}_{window}_{datasource_name}.csv')
 
 # Configure environment parameters
-
 experiment = GenericExperiment(env)
 
-# models = exp_model_list.my_experiment
-# models = exp_model_list.mysignal2vec_experiment
-models = exp_model_list.gmm_experiment
+window = TimeSeriesLength.WINDOW_1_HOUR  
 
-# models = {}
-# if window == TimeSeriesLength.WINDOW_10_MINS:
-#     models = exp_model_list.selected_models_10mins
-# elif window == TimeSeriesLength.WINDOW_1_HOUR:
-#     models = exp_model_list.selected_models_1h
-# elif window == TimeSeriesLength.WINDOW_2_HOURS:
-#     models = exp_model_list.selected_models_2h
-# elif window == TimeSeriesLength.WINDOW_8_HOURS:
-#     models = exp_model_list.selected_models_8h
-# elif window == TimeSeriesLength.WINDOW_4_HOURS:
-#     models = exp_model_list.selected_models_4h
-# elif window == TimeSeriesLength.WINDOW_1_DAY:
-#     models = exp_model_list.selected_models_24h
+# MyS2V hyper-param
+num_of_representative_vectors = 1
+window_size = 10
+window_step = 1
+min_n_components = 20
+max_n_components = 20
+epochs  = 2
+
+# File names 
+exp_name =  "/" + datasource_name + "/" + str(window)[24:] + "_" + str(max_n_components) # Remove timeseries from string
+
+mys2v_knn_weights = os.path.join(dirname_pre, f'{exp_name}.pkl')
+mys2v_embedding = os.path.join(dirname_pre, f'{exp_name}.csv')
+results_file_name = os.path.join(dirname_res, f'{exp_name}.csv')
+
+
+models =  infer_mysignal2vec_experiment = {
+    'MYSIGNAL2VEC_Build' : {
+        'CLF_MODELS' : [ 
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
+        ],
+        'TRANSFORMER_MODELS': [
+            TransformerFactory.build_mysignal2vec_train(num_of_representative_vectors, 
+                                                        window_size, window_step, min_n_components,
+                                                        max_n_components, epochs, exp_name),
+        ]
+    },
+    'MYSIGNAL2VEC_Infer' : {
+        'CLF_MODELS' : [ 
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
+        ],
+        'TRANSFORMER_MODELS': [
+           TransformerFactory.build_mysignal2vec_infer(mys2v_knn_weights, mys2v_embedding, num_of_vectors=1),
+        ]
+    }
+}
 
 for k in models.keys():
+    # Create fake/temporary 
     
     experiment.setup_running_params(
-        transformer_models=models[k][TRANSFORMER_MODELS],
-        classifier_models=models[k][CLF_MODELS],
+        transformer_models=models[k]['TRANSFORMER_MODELS'],
+        classifier_models=models[k]['CLF_MODELS'],
         train_appliances=appliances,
         test_appliances=appliances,
         ts_len=window,
         repeat=1
     )
 
-    experiment.set_checkpoint_file(same_datasource_exp_checkpoint)
+    experiment.set_checkpoint_file(results_file_name)
     tb = "No error"
     
     try:

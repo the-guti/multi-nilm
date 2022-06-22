@@ -23,6 +23,48 @@ BOSS = 'BOSS'
 TIME_DELAY_EMBEDDING = 'TIME_DELAY_EMBEDDING'
 WAVELETS = 'WAVELETS'
 
+# class ModelList:
+
+#     def __init__(self) -> None:
+#         super().__init__()
+
+#     def mys2vc_train_infer( num_of_representative_vectors, window_size, window_step, min_n_components, max_n_components, epochs, exp_name):
+#         infer_mysignal2vec_experiment = {
+#             MYSIGNAL2VEC : {
+#                 CLF_MODELS : [ # TODO when training should ignore the classifierß
+#                     MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
+#                     MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+#                 ],
+#                 TRANSFORMER_MODELS: [
+#                     TransformerFactory.build_mysignal2vec_infer(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1),
+#                     TransformerFactory.build_mysignal2vec_train(num_of_representative_vectors, 
+#                                                                 window_size, window_step, min_n_components,
+#                                                                 max_n_components, epochs, exp_name)]
+#             }
+#         }
+#         return infer_mysignal2vec_experiment
+
+train_gmm_experiment = {
+    MYSIGNAL2VEC : {
+        CLF_MODELS : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_train(1, 10,1,10,10,2,"")
+        ]
+    }
+}
+infer_mysignal2vec_experiment = {
+    MYSIGNAL2VEC : {
+        CLF_MODELS : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
+        ],
+        TRANSFORMER_MODELS: [
+            TransformerFactory.build_mysignal2vec_infer(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
+        ]
+    }
+}
+
 selected_models_10mins = {
     BOSS      : {
         CLF_MODELS        : [
@@ -30,7 +72,7 @@ selected_models_10mins = {
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_boss(word_size=4, n_bins=20, window_size=10, norm_mean=False,
-                                               norm_std=False)
+                                            norm_std=False)
         ]
     },
     SIGNAL2VEC: {
@@ -41,14 +83,7 @@ selected_models_10mins = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
         ]
     },
-    MYSIGNAL2VEC: {
-        CLF_MODELS        : [
-            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
-        ]
-    },
+ 
     PAA       : {
         CLF_MODELS        : [
             ExtraTreesClassifier(n_jobs=-1, n_estimators=500)
@@ -63,7 +98,7 @@ selected_models_10mins = {
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True)
+                                            supports_approximation=True)
         ]
     },
     SFA       : {
@@ -96,28 +131,28 @@ selected_models_4h = {
     BOSS      : {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(100,), learning_rate='adaptive', solver='adam', activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
+                        activation='logistic')
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=26, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=25, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=26, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=26, window_size=10, norm_mean=False,
-                                               norm_std=False)
+                                            norm_std=False)
         ]
     },
     SIGNAL2VEC: {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam'),
             MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam'),
@@ -127,21 +162,6 @@ selected_models_4h = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=10),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=10),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=10)
-        ]
-    },
-    MYSIGNAL2VEC: {
-        CLF_MODELS        : [
-            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam'),
-            MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam'),
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=5),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=10),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=10),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=10)
         ]
     },
     WEASEL    : {
@@ -181,13 +201,13 @@ selected_models_4h = {
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True)
+                                            supports_approximation=True)
         ]
     },
     SFA       : {
@@ -238,22 +258,22 @@ selected_models_8h = {
     BOSS      : {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
+                        activation='logistic')
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=20, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=20, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=4, n_bins=10, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=4, n_bins=10, window_size=10, norm_mean=False,
-                                               norm_std=False)
+                                            norm_std=False)
         ]
     },
     SIGNAL2VEC: {
@@ -268,20 +288,6 @@ selected_models_8h = {
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=5)
-        ]
-    },
-    MYSIGNAL2VEC: {
-        CLF_MODELS        : [
-            MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam'),
-            MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam'),
-            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam'),
-            MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam', activation='logistic')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=50),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=5)
         ]
     },
     WEASEL    : {
@@ -321,13 +327,13 @@ selected_models_8h = {
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True)
+                                            supports_approximation=True)
         ]
     },
     SFA       : {
@@ -378,59 +384,41 @@ selected_models_1h = {
     BOSS      : {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
+                        activation='logistic')
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_boss(word_size=4, n_bins=10, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=5, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=4, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=4, window_size=10, norm_mean=False,
-                                               norm_std=False)
+                                            norm_std=False)
         ]
     },
     SIGNAL2VEC: {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
+                        activation='logistic')
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=2),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
-        ]
-    },
-    MYSIGNAL2VEC: {
-        CLF_MODELS        : [
-            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(1000, 100,100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=2),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
         ]
     },
     WEASEL    : {
@@ -470,13 +458,13 @@ selected_models_1h = {
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
         ]
     },
     SFA       : {
@@ -527,56 +515,39 @@ selected_models_2h = {
     BOSS      : {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(100,), learning_rate='adaptive', solver='adam', activation='logistic')
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=20, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=20, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=20, window_size=10, norm_mean=False,
-                                               norm_std=False),
+                                            norm_std=False),
             TransformerFactory.build_pyts_boss(word_size=2, n_bins=20, window_size=10, norm_mean=False,
-                                               norm_std=False)
+                                            norm_std=False)
         ]
     },
     SIGNAL2VEC: {
         CLF_MODELS        : [
             MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(2000), learning_rate='adaptive', solver='adam', activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
+                        activation='logistic'),
             MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
+                        activation='logistic')
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
             TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=5)
-        ]
-    },
-     MYSIGNAL2VEC: {
-        CLF_MODELS        : [
-            MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(2000), learning_rate='adaptive', solver='adam', activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(2000, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=5)
         ]
     },
     WEASEL    : {
@@ -613,13 +584,13 @@ selected_models_2h = {
         ],
         TRANSFORMER_MODELS: [
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True),
+                                            supports_approximation=True),
             TransformerFactory.build_pyts_dft(n_coefs=10, norm_mean=False, norm_std=False,
-                                              supports_approximation=True)
+                                            supports_approximation=True)
         ]
     },
     SFA       : {
@@ -667,20 +638,6 @@ selected_models_2h = {
 }
 
 selected_models_24h = {
-    MYSIGNAL2VEC: {
-        CLF_MODELS        : [
-            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam'),
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
-            MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam'),
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=2),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=2),
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
-        ]
-    },
     # SIGNAL2VEC: {
     #     CLF_MODELS        : [
     #         MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam'),
@@ -828,11 +785,11 @@ selected_models_24h = {
 
 model_selection_clf_list = [
     MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive', solver='adam',
-                  activation='logistic'),
+                activation='logistic'),
     MLPClassifier(hidden_layer_sizes=(1000, 100), learning_rate='adaptive', solver='adam',
-                  activation='logistic'),
+                activation='logistic'),
     MLPClassifier(hidden_layer_sizes=(2000), learning_rate='adaptive', solver='adam',
-                  activation='logistic')
+                activation='logistic')
 ]
 
 model_selection_transformers = [
@@ -843,20 +800,20 @@ model_selection_transformers = [
 ]
 
 model_selection_mlknn = [MLkNN(k=1, s=1.0, ignore_first_neighbours=0),
-                         MLkNN(k=3, s=1.0, ignore_first_neighbours=0),
-                         MLkNN(k=10, s=1.0, ignore_first_neighbours=0),
-                         MLkNN(k=20, s=1.0, ignore_first_neighbours=0),
+                        MLkNN(k=3, s=1.0, ignore_first_neighbours=0),
+                        MLkNN(k=10, s=1.0, ignore_first_neighbours=0),
+                        MLkNN(k=20, s=1.0, ignore_first_neighbours=0),
 
-                         MLkNN(k=1, s=0.5, ignore_first_neighbours=0),
-                         MLkNN(k=3, s=0.5, ignore_first_neighbours=0),
-                         MLkNN(k=10, s=0.5, ignore_first_neighbours=0),
-                         MLkNN(k=20, s=0.5, ignore_first_neighbours=0),
+                        MLkNN(k=1, s=0.5, ignore_first_neighbours=0),
+                        MLkNN(k=3, s=0.5, ignore_first_neighbours=0),
+                        MLkNN(k=10, s=0.5, ignore_first_neighbours=0),
+                        MLkNN(k=20, s=0.5, ignore_first_neighbours=0),
 
-                         MLkNN(k=1, s=0.7, ignore_first_neighbours=0),
-                         MLkNN(k=3, s=0.7, ignore_first_neighbours=0),
-                         MLkNN(k=10, s=0.7, ignore_first_neighbours=0),
-                         MLkNN(k=20, s=0.7, ignore_first_neighbours=0)
-                         ]
+                        MLkNN(k=1, s=0.7, ignore_first_neighbours=0),
+                        MLkNN(k=3, s=0.7, ignore_first_neighbours=0),
+                        MLkNN(k=10, s=0.7, ignore_first_neighbours=0),
+                        MLkNN(k=20, s=0.7, ignore_first_neighbours=0)
+                        ]
 
 model_selection_rakel = [
     RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam')),
@@ -886,32 +843,32 @@ model_selection_delay_embeddings = [
 
 cv_signal2vec = [TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)]
 cv_signal2vec_clf = [MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive',
-                                   solver='adam', activation='logistic')]
+                                solver='adam', activation='logistic')]
 cv_boss_clf = [MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')]
 cv_boss = [TransformerFactory.build_pyts_boss(word_size=2, n_bins=2, window_size=10,
-                                              norm_mean=False, norm_std=False)]
+                                            norm_mean=False, norm_std=False)]
 
 state_of_the_art = {
     SIGNAL2VEC          : {
         CLF_MODELS        : [MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive',
-                                           solver='adam', activation='logistic')],
+                                        solver='adam', activation='logistic')],
         TRANSFORMER_MODELS: [TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)]
     },
     WAVELETS            : {
         CLF_MODELS        : [MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
-                             RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
-                                                  solver='adam'), labelset_size=5)],
+                            RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
+                                                solver='adam'), labelset_size=5)],
         TRANSFORMER_MODELS: [TransformerFactory.build_wavelet(), TransformerFactory.build_wavelet()]
     },
     TIME_DELAY_EMBEDDING: {
         CLF_MODELS        : [
             MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
             RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
-                                 solver='adam'), labelset_size=5)
+                                solver='adam'), labelset_size=5)
         ],
         TRANSFORMER_MODELS: [TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6),
-                             TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6)
-                             ]
+                            TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6)
+                            ]
     },
     BOSS                : {
         CLF_MODELS        : [
@@ -927,52 +884,5 @@ my_boss = {
             MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')],
         TRANSFORMER_MODELS: [TransformerFactory.build_pyts_boss(word_size=2, n_bins=4, window_size=10,
                                                                 norm_mean=False, norm_std=False)]
-    }
-}
-
-my_experiment = {
-    MYSIGNAL2VEC : {
-        CLF_MODELS : [
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_mysignal2vec_pre(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
-        ]
-    }
-}
-
-gmm_experiment = {
-    MYSIGNAL2VEC : {
-        CLF_MODELS : [
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.buil_mysignal2vec()
-        ]
-    }
-}
-
-mysignal2vec_experiment = {
-    MYSIGNAL2VEC : {
-        CLF_MODELS        : [
-            MLPClassifier(hidden_layer_sizes=(1000, 100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(1000, 100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic'),
-            MLPClassifier(hidden_layer_sizes=(1000, 100, 100), learning_rate='adaptive', solver='adam',
-                          activation='logistic')
-        ],
-        TRANSFORMER_MODELS: [
-            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=2),
-            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
-            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=4),
-            TransformerFactory.build_signal2vec(MY_SAVED_MODEL, MY_PATH_SIGNAL2VEC, num_of_vectors=1)
-            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=2),
-            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
-            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=4),
-            # TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)
-        ]
     }
 }

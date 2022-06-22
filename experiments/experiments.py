@@ -69,7 +69,7 @@ class ModelSelectionExperiment(Experiment):
 
                 self.save_experiment(description, reset_results, self.results_file)
 
-    def set_checkpoint_file(self, results_file: str = '../results/cross_val_window_4_hours.csv'):
+    def set_checkpoint_file(self, results_file: str = '../results/default.csv'):
         self.results_file = results_file
 
     def set_ts_len(self, ts_len: TimeSeriesLength = TimeSeriesLength.WINDOW_4_HOURS):
@@ -156,7 +156,7 @@ class GenericExperiment(Experiment):
 
                 self.save_experiment(description, reset_results, self.results_file)
 
-    def set_checkpoint_file(self, results_file: str = '../results/cross_val_window_4_hours.csv'):
+    def set_checkpoint_file(self, results_file: str = '../results/default.csv'):
         self.results_file = results_file
 
     def set_ts_len(self, ts_len: TimeSeriesLength = TimeSeriesLength.WINDOW_4_HOURS):

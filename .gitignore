@@ -1,5 +1,6 @@
 # Datasets
 Datasets/
+pretrained_models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -102,3 +103,5 @@ results/*
 
 *error*.err
 *output*.out
+
+experiments/KNN*

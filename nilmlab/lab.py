@@ -640,7 +640,7 @@ class Environment:
 
         info("Training...")
         start_time = time.time()
-        self.multilabel_clf.fit(data, target)
+        self.multilabel_clf.fit(data, target) # CHECK
         fit_time = time.time() - start_time
         timing(f"fit time {fit_time}")
         return preprocess_time, fit_time
@@ -704,13 +704,13 @@ class Environment:
             data = data[:-rem]
             target = target[:-rem]
         target = bucketize_target(target, window)
-        data = bucketize_data(data, window)
+        data = bucketize_data(data, window) # num of vectors to predict * idk * set vector size of 300
         # if representation_type == TransformerType.raw or representation_type == TransformerType.approximate:
         #     pass
         if representation_type == TransformerType.approximate \
                 or representation_type == TransformerType.transform_and_approximate:
             start_time = time.time()
-            data = self.reduce_dimensions(data, window, target, should_fit)
+            data = self.reduce_dimensions(data, window, target, should_fit) # reduce data to num of vec to predict * set vector size
             reduce_dimensions_time = time.time() - start_time
             timing(f"reduce dimensions time {reduce_dimensions_time}")
 

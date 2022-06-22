@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=1minuk15	# Job name
+#SBATCH --job-name=1hr20uk	# Job name
 #SBATCH --output=gpu_output.%A_%a.out	# Standard output log
 #SBATCH --error=gpu_error.%A_%a.err         # Error log config
 #SBATCH --nodes=1                  	# Run all processes on a single node	

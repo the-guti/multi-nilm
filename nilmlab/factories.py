@@ -9,7 +9,7 @@ from datasources.datasource import DatasourceFactory, Datasource
 from nilmlab.lab import Environment
 from nilmlab.lab import TransformerType
 from nilmlab.tstransformers import TSLearnTransformerWrapper, PytsTransformerWrapper, Signal2Vec, WaveletAdapter, \
-    TimeDelayEmbeddingAdapter, MySignal2Vec, MySignal2VecPre
+    TimeDelayEmbeddingAdapter, MySignal2VecTrain, MySignal2VecInfer
 # from src.transformers.my_signal2vec import MySignal2Vec
 
 SECONDS_PER_DAY = 60 * 60 * 24
@@ -203,21 +203,21 @@ class TransformerFactory:
         return wavelet_adapter
 
     @staticmethod
-    def buil_mysignal2vec(
-        word_size: int = 4, n_bins: int = 4, window_size: int = 10, window_step: int = 1,
+    def build_mysignal2vec_train(
+        num_of_representative_vectors, window_size, window_step, min_n_components, max_n_components, epochs, exp_name,
         transformer_type: TransformerType = TransformerType.transform_and_approximate
     ):
 
-        mysignal2vec = MySignal2Vec()
+        mysignal2vec = MySignal2VecTrain(num_of_representative_vectors, window_size, window_step, min_n_components, max_n_components, epochs, exp_name)
         mysignal2vec.set_type(transformer_type)
 
         return mysignal2vec
 
     @staticmethod
-    def build_mysignal2vec_pre(classifier_path: str, embedding_path: str,
+    def build_mysignal2vec_infer(classifier_path: str, embedding_path: str,
                          transformer_type: TransformerType = TransformerType.transform_and_approximate,
                          num_of_vectors: int = 1):
-        mysignal2vec_pre = MySignal2VecPre(classifier_path, embedding_path, num_of_representative_vectors=num_of_vectors)
+        mysignal2vec_pre = MySignal2VecInfer(classifier_path, embedding_path, num_of_representative_vectors=num_of_vectors)
         mysignal2vec_pre.set_type(transformer_type)
         return mysignal2vec_pre
 

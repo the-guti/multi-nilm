@@ -1,4 +1,4 @@
-import dataclasses
+import os
 from doctest import debug_script
 import time
 from typing import Union, Iterable
@@ -45,14 +45,15 @@ SECONDS_PER_DAY = 60 * 60 * 24
 
 CAPACITY15GB = 1024 * 1024 * 1024 * 15
 
-exp_name = "max15comp" + " ukdale_1min_" 
-comps = 15
 
 # Train
-class MySignal2Vec(TimeSeriesTransformer):
+class MySignal2VecTrain(TimeSeriesTransformer):
 
     def __init__(
-        self, num_of_representative_vectors: int = 1, window_size: int = 9, window_step: int = 1, min_n_components: int = 1, max_n_components: int = comps
+        self, num_of_representative_vectors: int = 1, window_size: int = 10, 
+        window_step: int = 1, min_n_components: int = 1, 
+        max_n_components: int = 10, epochs: int = 1,
+        exp_name: str = ""
     ):
 
         super().__init__()
@@ -62,6 +63,9 @@ class MySignal2Vec(TimeSeriesTransformer):
         self.num_of_representative_vectors = num_of_representative_vectors
         self.min_n_components = min_n_components
         self.max_n_components = max_n_components
+        self.exp_name =  exp_name
+        self.epochs = epochs
+        self.name = "mySignal2VecTrain"
 
         # Initialize components
 
@@ -108,10 +112,13 @@ class MySignal2Vec(TimeSeriesTransformer):
             raise Exception('MySignal2vec does not support only approximation. The series has to be transformed firstly')
         self.type = method_type
 
-    def get_name(self):
-        raise Exception('MySignal2Vec doesn\'t support get_name yet.')
+    # def get_name(self):
+    #     raise Exception('MySignal2Vec doesn\'t support get_name yet.')
 
-    def train_skipgram(self, token_sequence, lr: float = 1e-3, epochs: int = 3) -> None:
+    def get_name(self):
+        return type(self).__name__
+
+    def train_skipgram(self, token_sequence, lr: float = 1e-3) -> None:
 
         start_time = time.time()
 
@@ -123,7 +130,7 @@ class MySignal2Vec(TimeSeriesTransformer):
 
         loss_history = []
 
-        for e in range(epochs):
+        for e in range(self.epochs):
 
             for i in range(len(token_sequence) - self.window_size):
 
@@ -151,11 +158,12 @@ class MySignal2Vec(TimeSeriesTransformer):
             emb_np = [em.detach().cpu().numpy() for em in emb.T]
             df = pd.DataFrame(emb_np)
             # Prepare name of file
-            dt_string = datetime.now().strftime("%H_%M_%S-%d_%m_%Y")
-
-            file_name = "emb_" + exp_name + str(e) + "ep_"+dt_string +".csv"
+            # dt_string = datetime.now().strftime("_%H_%M_%S-%d_%m_%Y")
+            dirname = os.path.join(os.path.abspath(''), "pretrained_models/")
+            file_name = dirname + self.exp_name + ".csv"
+            # TODO delete prev epoch file, save as binary 
             # Save CSV
-            df.to_csv(file_name, index=False)
+            df.to_csv(file_name , index=False)
 
         timing('MySignal2Vec.build_skip_gram: Finished building : {}'.format(round(time.time() - start_time, 2)))
 
@@ -200,15 +208,15 @@ class MySignal2Vec(TimeSeriesTransformer):
 
         self.quant_clf = KNeighborsClassifier(n_neighbors=n_neighbors)
         
-        debug(f'================D-333 N tokens {n_neighbors}')
+        debug(f'Quantization N tokens {n_neighbors}')
 
         start_time = time.time()
         self.quant_clf.fit(X=X, y=y)
         # Save file
         debug(f'MySignal2Vec.train_quantization_clf: saving checkpoint.')
-        dt_string = datetime.now().strftime("%H_%M_%S-%d_%m_%Y")
-        file_name = "KNNweights_" + exp_name +dt_string +".pkl"
+        dirname = os.path.join(os.path.abspath(''), "pretrained_models/")
 
+        file_name = dirname + self.exp_name + ".pkl"
         joblib.dump(self.quant_clf,file_name)
         
 
@@ -237,25 +245,27 @@ class MySignal2Vec(TimeSeriesTransformer):
 
         lowest_bic = np.infty
         bic = []
-        n_components_range = range(self.min_n_components, self.max_n_components)
-        cv_types = [ "spherical", "tied", "diag", "full" ]
+        n_components_range = range(self.min_n_components, self.max_n_components+1) 
+        # cv_types = [ "spherical", "tied", "diag", "full" ]
 
-        for cv_type in cv_types:
+        # for cv_type in cv_types:
 
-            for n_components in n_components_range:
+        for n_components in n_components_range:
 
-                gmm = GaussianMixture(
-                    n_components=n_components, covariance_type=cv_type, warm_start=True, reg_covar=1e-6
-                )
+            gmm = GaussianMixture(
+                n_components=n_components, covariance_type='full', warm_start=True, reg_covar=1e-6
+            )
 
-                for chunk in data_chunks:
+            # number of chunks depends on the available memory, usually just one
+            for chunk in data_chunks:
 
-                    # Fit a Gaussian mixture with EM
-                    gmm.fit(chunk)
-                    bic.append(gmm.bic(chunk))
-                    if bic[-1] < lowest_bic:
-                        lowest_bic = bic[-1]
-                        best_gmm = gmm 
+                # Fit a Gaussian mixture with EM
+                gmm.fit(chunk)
+                bic.append(gmm.bic(chunk))
+                if bic[-1] < lowest_bic:
+                    lowest_bic = bic[-1]
+                    best_gmm = gmm 
+            # debug(f'Finished cv_type {cv_type}' )
 
 
         bic = np.array(bic)
@@ -278,7 +288,7 @@ class MySignal2Vec(TimeSeriesTransformer):
         chunk_size = sample_period * SECONDS_PER_DAY
         if memory.total >= CAPACITY15GB:
             chunk_size = chunk_size * 2
-        seq = list()
+        # seq = list()
         split_n = max(int(len(sequence) / chunk_size), 1)
         rem = len(sequence) % split_n
         if rem != 0:
@@ -288,18 +298,25 @@ class MySignal2Vec(TimeSeriesTransformer):
         return [chunk.reshape(-1,1) for chunk in np.split(sequence, split_n)]
 
 # Infer
-class MySignal2VecPre(TimeSeriesTransformer):
+class MySignal2VecInfer(TimeSeriesTransformer):
 
     def __init__(self, classifier_path: str, embedding_path: str, num_of_representative_vectors: int = 1):
         super().__init__()
-        self.clf = joblib.load(classifier_path)
-        embedding = pd.read_csv(embedding_path)
-        self.embedding = embedding.reset_index().to_dict('list')
+        # Save directory of weights and embeddings
+        self.classifier_path = classifier_path
+        self.embedding_path = embedding_path
         self.type = TransformerType.transform_and_approximate
         self.num_of_representative_vectors = num_of_representative_vectors
+        self.name = "mySignal2VecInfer"
 
     def __repr__(self):
         return f"Signal2Vec num_of_representative_vectors: {self.num_of_representative_vectors}"
+
+    def load_weights(self):
+        self.clf = joblib.load(self.classifier_path)
+        embedding = pd.read_csv(self.embedding_path)
+        self.embedding = embedding.reset_index().to_dict('list')
+        pass
 
     def transform(self, series: np.ndarray, sample_period: int = 6) -> np.ndarray:
         discrete_series = self.discretize_in_chunks(series, sample_period)
@@ -317,7 +334,7 @@ class MySignal2VecPre(TimeSeriesTransformer):
             window = int(window / self.num_of_representative_vectors)
             data_in_batches = np.reshape(data_in_batches,
                                          (len(data_in_batches), window, 300 * self.num_of_representative_vectors))
-
+        # Squeeze vectors into 1 of 300 size
         squeezed_seq = np.sum(data_in_batches, axis=1)
         vf = np.vectorize(lambda x: x / window)
         squeezed_seq = vf(squeezed_seq)

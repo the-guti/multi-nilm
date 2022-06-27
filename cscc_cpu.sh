@@ -6,7 +6,7 @@
 #SBATCH --nodes=1                  	# Run all processes on a single node	
 #SBATCH --ntasks=1			# Run on a single CPU
 #SBATCH --mem-per-cpu=8000		# Job memory request
-#SBATCH -q cpu-2                        
+#SBATCH -q cpu-512                       
 #SBATCH -p cpu                         
 
 

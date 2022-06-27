@@ -39,8 +39,8 @@ if datasource_ix:
         building=1,
         sample_period=6,
         train_year="2011-2011",
-        train_start_date="4-19-2011",
-        train_end_date="4-20-2011",
+        train_start_date="4-1-2011",
+        train_end_date="4-30-2011",
         test_year="2011",
         test_start_date="5-1-2011",
         test_end_date="5-2-2011",
@@ -89,24 +89,24 @@ results_file_name = os.path.join(dirname_res, f'{exp_name}.csv')
 
 
 models =  infer_mysignal2vec_experiment = {
-    # 'MYSIGNAL2VEC_Build' : {
-    #     'CLF_MODELS' : [ 
-    #         MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
-    #     ],
-    #     'TRANSFORMER_MODELS': [
-    #         TransformerFactory.build_mysignal2vec_train(num_of_representative_vectors, 
-    #                                                     window_size, window_step, min_n_components,
-    #                                                     max_n_components, epochs, exp_name),
-    #     ]
-    # },
-    'MYSIGNAL2VEC_Infer' : {
+    'MYSIGNAL2VEC_Build' : {
         'CLF_MODELS' : [ 
             MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
         ],
         'TRANSFORMER_MODELS': [
-           TransformerFactory.build_mysignal2vec_infer(mys2v_knn_weights, mys2v_embedding, num_of_vectors=1),
+            TransformerFactory.build_mysignal2vec_train(num_of_representative_vectors, 
+                                                        window_size, window_step, min_n_components,
+                                                        max_n_components, epochs, exp_name),
         ]
-    }
+    },
+    # 'MYSIGNAL2VEC_Infer' : {
+    #     'CLF_MODELS' : [ 
+    #         MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam'),
+    #     ],
+    #     'TRANSFORMER_MODELS': [
+    #        TransformerFactory.build_mysignal2vec_infer(mys2v_knn_weights, mys2v_embedding, num_of_vectors=1),
+    #     ]
+    # }
 }
 
 for k in models.keys():

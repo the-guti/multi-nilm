@@ -75,25 +75,27 @@ class MySignal2VecTrain(TimeSeriesTransformer):
 
     def transform(self, series: np.ndarray, sample_period: int = 6) -> np.ndarray:
 
-        # Transfort series to appriate dimmension
-
+        # Transform series to appriate dimmension
         series = series.reshape(-1,1)
 
-        # Extract the vocabulary and data corpus
+        # Normalize data  TODO do it in the datasource, review keras normalization layer
+        data_min = np.min(series)
+        data_max = np.max(series)
 
-        n_clusters, token_sequence = self.get_token_sequence(series=series, sample_period=sample_period)
+        scaled_series = (series - data_min) / (data_max - data_min)
+
+        # Extract the vocabulary and data corpus
+        n_clusters, token_sequence = self.get_token_sequence(series=scaled_series, sample_period=sample_period)
 
         self.vocabulary = np.array(range(n_clusters))
 
         # Train kNN to quantize in the future
-
-        self.train_quantization_clf(n_neighbors=n_clusters, X=series, y=token_sequence)
+        self.train_quantization_clf(n_neighbors=n_clusters, X=scaled_series, y=token_sequence)
 
         # Train skip_gram data
-
         self.train_skipgram(token_sequence=token_sequence)
 
-        raise Exception('MySignal2Vec doesn\'t support transform yet.')
+        # raise Exception('MySignal2Vec doesn\'t support transform yet.')
 
     def approximate(self, data_in_batches: np.ndarray, window: int = 1, should_fit: bool = True) -> list:
        
@@ -240,7 +242,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
         return clustering_model.n_components, sequence_of_tokens
 
     def get_best_clustering_model(self, data_chunks: ndarray) -> GaussianMixture:
-
+        # TODO normalize 
         lowest_bic = np.infty
         bic = []
         n_components_range = range(self.min_n_components, self.max_n_components+1) 
@@ -374,8 +376,8 @@ class MySignal2VecInfer(TimeSeriesTransformer):
 
     def map_into_vectors(self, sequence):
         start_time = time.time()
-        sequence_of_vectors = [self.embedding[i] for i in sequence] #TODO ERROR, calculating sequence wrong?
-        # sequence_of_vectors = [self.embedding[str(i)] for i in sequence] #TODO ERROR, calculating sequence wrong?
+        sequence_of_vectors = [self.embedding[i] for i in sequence]
+        # sequence_of_vectors = [self.embedding[str(i)] for i in sequence] 
 
         timing('Appending vectors to list : {}'.format(round(time.time() - start_time, 2)))
         return sequence_of_vectors

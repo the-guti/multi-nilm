@@ -12,6 +12,8 @@ from utils.logger import debug
 
 LOG_DIR = "/l/users/roberto.guillen/nilm/logs"
 
+
+
 # Prepare Folders
 dirname = os.path.abspath('')
 
@@ -29,8 +31,8 @@ if not os.path.exists(dirname_pre):
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 
-
-datasource_ix = 0 # 0,false,ukdale    / 1,true,redd
+#TODO training_length = 0 # 0 day, 1 week, 2 month, 3 year, 4 full dataset / 2,3,4 only applies to ukdale
+datasource_ix = 0# 0,false,ukdale    / 1,true,redd
 
 if datasource_ix:
     datasource_name = 'redd'
@@ -39,12 +41,12 @@ if datasource_ix:
         'unknown', 'electric oven','sockets', 'electric space heater', 'microwave', 
         'washer dryer', 'light', 'electric stove', 'dish washer', 'fridge'
     ]
+    
     env = EnvironmentFactory.create_env_single_building(
         datasource=datasource,
         building=1,
         sample_period=6,
         train_year="2011-2011",
-        #train_start_date="4-1-2011",
         train_start_date="4-1-2011",
         train_end_date="4-30-2011",
         test_year="2011",
@@ -63,12 +65,12 @@ else:
         datasource=DatasourceFactory.create_uk_dale_datasource(),
         building=1,
         sample_period=6,
-        train_year="2013-2013",
-        train_start_date="3-29-2013",
-        train_end_date="5-30-2013",
+        train_year="2013-2014",
+        train_start_date="4-12-2013",
+        train_end_date="6-01-2014",
         test_year="2014",
-        test_start_date="3-1-2014",
-        test_end_date="5-30-2014",
+        test_start_date="6-2-2014",
+        test_end_date="12-30-2014",
         appliances=appliances
     )
 
@@ -81,12 +83,12 @@ window = TimeSeriesLength.WINDOW_1_HOUR
 num_of_representative_vectors = 1
 window_size = 10
 window_step = 1
-min_n_components = 80
-max_n_components = 80
+min_n_components = 4
+max_n_components = 4
 epochs  = 2
 
 # File names TODO review custom names and actual comps 
-custom_exp_name = "1_day_256"
+custom_exp_name = "1_year_256"
 exp_name = datasource_name + "/" + str(window)[24:] + "_" + str(max_n_components) + "_" + custom_exp_name #str window =  Remove timeseries from string
 
 mys2v_knn_weights = os.path.join(dirname_pre, f'{exp_name}_weight.pkl')

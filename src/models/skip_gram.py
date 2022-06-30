@@ -2,7 +2,7 @@ from torch.nn import Module, Sequential, Embedding, Linear, LogSoftmax
 
 class SkipGram(Module):
 
-    def __init__(self, n_vocabulary: int, n_embedding: int = 300) -> None:
+    def __init__(self, n_vocabulary: int, n_embedding: int = 256) -> None:
 
         super().__init__()
 

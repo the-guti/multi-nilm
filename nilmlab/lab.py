@@ -704,7 +704,7 @@ class Environment:
             data = data[:-rem]
             target = target[:-rem]
         target = bucketize_target(target, window)
-        data = bucketize_data(data, window) # num of vectors to predict * idk * set vector size of 300
+        data = bucketize_data(data, window) # num of vectors to predict * idk * set vector size of 256
         # if representation_type == TransformerType.raw or representation_type == TransformerType.approximate:
         #     pass
         if representation_type == TransformerType.approximate \

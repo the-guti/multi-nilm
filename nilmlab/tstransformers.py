@@ -95,11 +95,10 @@ class MySignal2VecTrain(TimeSeriesTransformer):
         # Train skip_gram data
         self.train_skipgram(token_sequence=token_sequence)
 
-        # raise Exception('MySignal2Vec doesn\'t support transform yet.')
+        raise Exception('MySignal2Vec Infer ended')
 
-    def approximate(self, data_in_batches: np.ndarray, window: int = 1, should_fit: bool = True) -> list:
-       
-        print(data_in_batches)
+    def approximate(self, data_in_batches: np.ndarray, window: int = 1, should_fit: bool = True) -> list:  
+        # print(data_in_batches)
        
         raise Exception('MySignal2Vec doesn\'t support approximate yet.')
 
@@ -242,7 +241,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
         return clustering_model.n_components, sequence_of_tokens
 
     def get_best_clustering_model(self, data_chunks: ndarray) -> GaussianMixture:
-        # TODO normalize 
+        # TODO review normalize for bic 
         lowest_bic = np.infty
         bic = []
         n_components_range = range(self.min_n_components, self.max_n_components+1) 
@@ -270,8 +269,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
 
         bic = np.array(bic)
 
-        debug_script
-
+        debug(f'Best BIC {lowest_bic}' )
         return best_gmm
 
     def map_into_vectors(self, sequence):
@@ -341,8 +339,8 @@ class MySignal2VecInfer(TimeSeriesTransformer):
         if self.num_of_representative_vectors > 1:
             window = int(window / self.num_of_representative_vectors)
             data_in_batches = np.reshape(data_in_batches,
-                                         (len(data_in_batches), window, 300 * self.num_of_representative_vectors))
-        # Squeeze vectors into 1 of 300 size
+                                         (len(data_in_batches), window, 256 * self.num_of_representative_vectors))
+        # Squeeze vectors into 1 of 256 size
         squeezed_seq = np.sum(data_in_batches, axis=1)
         vf = np.vectorize(lambda x: x / window)
         squeezed_seq = vf(squeezed_seq)

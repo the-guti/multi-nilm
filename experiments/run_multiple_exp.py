@@ -12,8 +12,6 @@ from utils.logger import debug
 
 LOG_DIR = "/l/users/roberto.guillen/nilm/logs"
 
-
-
 # Prepare Folders
 dirname = os.path.abspath('')
 
@@ -59,18 +57,19 @@ else:
     datasource = DatasourceFactory.create_uk_dale_datasource()
     appliances = [
         'microwave', 'dish washer', 'fridge', 'kettle', 'washer dryer',
-        'toaster', 'television', 'hair dryer', 'vacuum cleaner'
+        'toaster', 'television'
     ]
     env = EnvironmentFactory.create_env_single_building(
         datasource=DatasourceFactory.create_uk_dale_datasource(),
         building=1,
         sample_period=6,
-        train_year="2013-2014",
+        train_year="2013-2013",
         train_start_date="4-12-2013",
-        train_end_date="6-01-2014",
+        train_end_date="4-13-2013",
+        #train_end_date="6-01-2014",
         test_year="2014",
-        test_start_date="6-2-2014",
-        test_end_date="12-30-2014",
+        test_start_date="4-12-2014",
+        test_end_date="4-13-2014",
         appliances=appliances
     )
 
@@ -85,10 +84,10 @@ window_size = 10
 window_step = 1
 min_n_components = 4
 max_n_components = 4
-epochs  = 2
+epochs  = 1
 
 # File names TODO review custom names and actual comps 
-custom_exp_name = "1_year_256"
+custom_exp_name = "1_day_test"
 exp_name = datasource_name + "/" + str(window)[24:] + "_" + str(max_n_components) + "_" + custom_exp_name #str window =  Remove timeseries from string
 
 mys2v_knn_weights = os.path.join(dirname_pre, f'{exp_name}_weight.pkl')

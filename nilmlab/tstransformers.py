@@ -148,7 +148,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
                 log_ps = self.skipgram_mlp(encoded_input)
                 loss = criterion(log_ps, encoded_target)
                 if i % 10000 == 0:
-                    loss_history.append(loss)
+                    loss_history.append(loss.item())
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -161,7 +161,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
 
             # Prepare name of file and save
             dirname = os.path.join(os.path.abspath(''), "pretrained_models/")
-            file_name = dirname + self.exp_name + "_emb.pkl"
+            file_name = self.exp_name + "_emb.pkl"
             joblib.dump(df,file_name)
 
         timing('MySignal2Vec.build_skip_gram: Finished building : {}'.format(round(time.time() - start_time, 2)))
@@ -215,7 +215,7 @@ class MySignal2VecTrain(TimeSeriesTransformer):
         debug(f'MySignal2Vec.train_quantization_clf: saving checkpoint.')
         dirname = os.path.join(os.path.abspath(''), "pretrained_models/")
 
-        file_name = dirname + self.exp_name + "_weight.pkl"
+        file_name = self.exp_name + "_weight.pkl"
         joblib.dump(self.quant_clf,file_name)
         
 

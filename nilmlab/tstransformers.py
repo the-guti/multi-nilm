@@ -160,7 +160,6 @@ class MySignal2VecTrain(TimeSeriesTransformer):
             df = pd.DataFrame(emb_np)
 
             # Prepare name of file and save
-            dirname = os.path.join(os.path.abspath(''), "pretrained_models/")
             file_name = self.exp_name + "_emb.pkl"
             joblib.dump(df,file_name)
 

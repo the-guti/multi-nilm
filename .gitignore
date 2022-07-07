@@ -1,6 +1,7 @@
 # Datasets
 Datasets/
 pretrained_models/
+cluster_output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

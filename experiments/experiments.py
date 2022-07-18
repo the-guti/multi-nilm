@@ -8,7 +8,6 @@ from utils.logger import timing
 
 reset_results = False
 
-
 class ModelSelectionExperiment(Experiment):
     appliances = ['oven', 'microwave', 'dish washer', 'fridge freezer', 'kettle', 'washer dryer',
                   'toaster', 'boiler', 'television', 'hair dryer', 'vacuum cleaner', 'light']

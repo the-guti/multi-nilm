@@ -53,7 +53,7 @@ result_logger = ResultLogger(db_name='nilm')
 
 result_logger.create_db()
 for row in  result_logger.get_results():
-    #print(row[0],pickle.loads(row[1]))
+    print(row[0],pickle.loads(row[1]))
     print(row[0])
     #print(pickle.loads(row[1]))
 # print(joblib.load(res))

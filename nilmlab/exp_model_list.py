@@ -815,6 +815,7 @@ WAVELETS = 'WAVELETS'
 #                         MLkNN(k=20, s=0.7, ignore_first_neighbours=0)
 #                         ]
 
+
 # model_selection_rakel = [
 #     RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam')),
 #     RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive', solver='adam'), labelset_size=5),
@@ -886,3 +887,64 @@ WAVELETS = 'WAVELETS'
 #                                                                 norm_mean=False, norm_std=False)]
 #     }
 # }
+=======
+state_of_the_art = {
+    SIGNAL2VEC          : {
+        CLF_MODELS        : [MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive',
+                                           solver='adam', activation='logistic')],
+        TRANSFORMER_MODELS: [TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)]
+    },
+    WAVELETS            : {
+        CLF_MODELS        : [MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
+                             RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
+                                                  solver='adam'), labelset_size=5)],
+        TRANSFORMER_MODELS: [TransformerFactory.build_wavelet(), TransformerFactory.build_wavelet()]
+    },
+    TIME_DELAY_EMBEDDING: {
+        CLF_MODELS        : [
+            MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
+            RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
+                                 solver='adam'), labelset_size=5)
+        ],
+        TRANSFORMER_MODELS: [TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6),
+                             TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6)
+                             ]
+    },
+    BOSS                : {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')],
+        TRANSFORMER_MODELS: [TransformerFactory.build_pyts_boss(word_size=2, n_bins=4, window_size=10,
+                                                                norm_mean=False, norm_std=False)]
+    }
+}
+
+
+run_new = {
+    # SIGNAL2VEC          : {
+    #     CLF_MODELS        : [MLPClassifier(hidden_layer_sizes=(1000,), learning_rate='adaptive',
+    #                                        solver='adam', activation='logistic')],
+    #     TRANSFORMER_MODELS: [TransformerFactory.build_signal2vec(SAVED_MODEL, PATH_SIGNAL2VEC, num_of_vectors=1)]
+    # },
+    # WAVELETS            : {
+    #     CLF_MODELS        : [MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
+    #                          RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
+    #                                               solver='adam'), labelset_size=5)],
+    #     TRANSFORMER_MODELS: [TransformerFactory.build_wavelet(), TransformerFactory.build_wavelet()]
+    # },
+    # TIME_DELAY_EMBEDDING: {
+    #     CLF_MODELS        : [
+    #         MLkNN(ignore_first_neighbours=0, k=3, s=1.0),
+    #         RakelD(MLPClassifier(hidden_layer_sizes=(100, 100, 100), learning_rate='adaptive',
+    #                              solver='adam'), labelset_size=5)
+    #     ],
+    #     TRANSFORMER_MODELS: [TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6),
+    #                          TransformerFactory.build_delay_embedding(delay_in_seconds=30, dimension=6)
+    #                          ]
+    # },
+    BOSS                : {
+        CLF_MODELS        : [
+            MLPClassifier(hidden_layer_sizes=(2000, 100, 100), learning_rate='adaptive', solver='adam')],
+        TRANSFORMER_MODELS: [TransformerFactory.build_pyts_boss(word_size=2, n_bins=4, window_size=10,
+                                                                norm_mean=False, norm_std=False)]
+    }
+}

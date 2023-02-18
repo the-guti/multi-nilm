@@ -188,7 +188,7 @@ class Datasource():
     @staticmethod
     def normalize_columns(df: DataFrame, meter_group: MeterGroup, appliance_names: List[str]) -> Tuple[DataFrame, dict]:
         """
-        It normalizes the names of the columns for compatibility.
+        It normalizes the names of the columns for compatibility. Makes them lower case
         Args:
             df (DataFrame):
             meter_group (MeterGroup):

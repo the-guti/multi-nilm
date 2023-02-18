@@ -1,5 +1,15 @@
 # Datasets
 Datasets/
+pretrained_models/
+cluster_output/
+
+results/**/*.csv
+!results/__init__.py
+
+*error*.err
+*output*.out
+
+experiments/KNN*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -97,6 +107,3 @@ ENV/
 # For mac
 .DS_Store
 .~lock*
-results/*
-!results/__init__.py
-

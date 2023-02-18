@@ -91,6 +91,7 @@ def apply_create_labels_on_df(dataframe, threshold):
 
 
 @njit(parallel=True)
+# 1 if appliance is on at that time and 0 if appliance is off at that time (usually 6 secs)
 def create_labels(array, threshold):
     res = np.empty(array.shape)
     for i in range(len(array)):

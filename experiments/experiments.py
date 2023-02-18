@@ -8,7 +8,6 @@ from utils.logger import timing
 
 reset_results = False
 
-
 class ModelSelectionExperiment(Experiment):
     appliances = ['oven', 'microwave', 'dish washer', 'fridge freezer', 'kettle', 'washer dryer',
                   'toaster', 'boiler', 'television', 'hair dryer', 'vacuum cleaner', 'light']
@@ -69,7 +68,7 @@ class ModelSelectionExperiment(Experiment):
 
                 self.save_experiment(description, reset_results, self.results_file)
 
-    def set_checkpoint_file(self, results_file: str = '../results/cross_val_window_4_hours.csv'):
+    def set_checkpoint_file(self, results_file: str = '../results/default.csv'):
         self.results_file = results_file
 
     def set_ts_len(self, ts_len: TimeSeriesLength = TimeSeriesLength.WINDOW_4_HOURS):
@@ -121,7 +120,8 @@ class GenericExperiment(Experiment):
             transformer_descr = str(transformer)
             clf = self.classifiers[model_index]
             clf_descr = str(clf)
-            for i in range(self.repeat):
+            # run 
+            for _ in range(self.repeat):
                 self.env.place_multilabel_classifier(clf)
                 self.env.place_ts_transformer(transformer)
                 start_time = time.time()
@@ -156,7 +156,7 @@ class GenericExperiment(Experiment):
 
                 self.save_experiment(description, reset_results, self.results_file)
 
-    def set_checkpoint_file(self, results_file: str = '../results/cross_val_window_4_hours.csv'):
+    def set_checkpoint_file(self, results_file: str = '../results/default.csv'):
         self.results_file = results_file
 
     def set_ts_len(self, ts_len: TimeSeriesLength = TimeSeriesLength.WINDOW_4_HOURS):
